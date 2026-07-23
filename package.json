@@ -1,0 +1,32 @@
+{
+  "name": "bairu",
+  "version": "0.1.0",
+  "description": "A platform that connects people with local businesses, services and opportunities.",
+  "keywords": [
+    "monorepo",
+    "nextjs",
+    "nestjs",
+    "typescript",
+    "local-business",
+    "platform"
+  ],
+  "author": "Luciana Kyoko",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "turbo run format"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.16.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "devDependencies": {
+    "turbo": "^2.10.6"
+  }
+}

@@ -1,0 +1,29 @@
+# ==========================================================
+# Git Attributes
+# ==========================================================
+
+# Normalize text files automatically
+* text=auto eol=lf
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg text
+
+# Documents
+*.pdf binary
+
+# Archives
+*.zip binary
+*.gz binary
+*.tar binary
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
