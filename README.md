@@ -14,7 +14,7 @@ Bairu is a community-driven platform designed to connect people with local busin
 
 Many small businesses and skilled professionals struggle to be discovered, while people often have difficulty finding reliable local services when they need them. Bairu aims to bridge this gap by creating a simple and accessible way for communities to discover what exists around them.
 
-The platform helps local businesses showcase their products and services, enables professionals to promote their work, and allows users to find discover trusted services close to where they live.
+The platform helps local businesses showcase their products and services, enables professionals to promote their work, and allows users to discover trusted services close to where they live.
 
 More than a digital directory, Bairu was created with the vision of strengthening local connections through technology, making neighborhoods more connected and helping valuable opportunities become visible.
 
