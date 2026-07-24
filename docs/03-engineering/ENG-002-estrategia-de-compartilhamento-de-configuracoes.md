@@ -278,10 +278,58 @@ nest
 ---
 
 # 8. Estratégia para Prettier
+## Objetivo
+Centralizar as configurações de formatação de código utilizadas por todas as aplicações e packages do monorepo Bairu.
+O objetivo é garantir que todo o projeto siga um único padrão visual, reduzindo discussões sobre estilo de código e mantendo o histórico do Git mais limpo e consistente.
 
-**Status:** Planejado
+## Filosofia
+O Prettier é responsável exclusivamente pela formatação automática do código.
+Sua função é eliminar decisões subjetivas relacionadas ao estilo de escrita, permitindo que a equipe concentre seu tempo na arquitetura, lógica de negócio e qualidade do software.
+No Bairu, a configuração do Prettier será compartilhada entre todas as aplicações e packages, garantindo uma experiência consistente durante todo o desenvolvimento.
+A configuração deverá permanecer simples, utilizando o mínimo possível de opções customizadas e priorizando o comportamento padrão da ferramenta sempre que possível.
 
-Será documentado quando a configuração compartilhada do Prettier for implementada.
+## Estratégia
+A configuração compartilhada será disponibilizada através do package:
+
+```
+packages/
+└── config-prettier
+```
+
+Esse package será responsável por fornecer uma única configuração reutilizável para todo o monorepo.
+Todas as aplicações e packages deverão consumir essa configuração, evitando duplicação de arquivos e divergências entre projetos.
+
+## Separação de responsabilidades
+Cada ferramenta possui uma responsabilidade bem definida dentro do fluxo de desenvolvimento do Bairu.
+| Ferramenta | Responsabilidade                                       |
+| ---------- | ------------------------------------------------------ |
+| TypeScript | Segurança de tipos e validação durante a compilação    |
+| ESLint     | Qualidade do código e boas práticas de desenvolvimento |
+| Prettier   | Formatação automática e padronização visual do código  |
+
+O Prettier não será utilizado para validar regras de qualidade, assim como o ESLint não será utilizado para definir regras de formatação.
+
+Essa separação mantém as responsabilidades bem definidas e reduz conflitos entre ferramentas.
+
+## Formatação automática
+O fluxo de desenvolvimento do projeto deverá privilegiar a formatação automática do código.
+Sempre que possível, os editores utilizados pela equipe deverão executar o Prettier automaticamente ao salvar um arquivo.
+Dessa forma, todos os desenvolvedores trabalham sobre um código visualmente consistente, independentemente de preferências pessoais de formatação.
+
+## Evolução
+A configuração deverá evoluir conforme o crescimento do monorepo, mantendo uma única fonte de verdade para todas as regras de formatação.
+
+A estrutura prevista é:
+
+```
+config-prettier/
+
+├── package.json
+├── prettier.config.mjs
+└── README.md
+```
+
+Novas configurações somente serão adicionadas quando houver necessidade real identificada durante o desenvolvimento do projeto, evitando customizações desnecessárias e preservando a simplicidade da ferramenta.
 
 ---
 
