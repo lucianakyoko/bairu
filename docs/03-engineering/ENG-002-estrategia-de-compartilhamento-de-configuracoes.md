@@ -239,10 +239,41 @@ Essa estratégia garante que melhorias realizadas na configuração base sejam a
 ---
 
 # 7. Estratégia para ESLint
+## Objetivo
 
-**Status:** Planejado
+Centralizar as regras de qualidade de código utilizadas por todas as aplicações e packages do monorepo.
 
-Será documentado quando a configuração compartilhada do ESLint for implementada.
+## Filosofia
+
+O ESLint é responsável por validar a qualidade do código, identificar más práticas e garantir consistência semântica entre os projetos.
+
+Ele não é responsável pela formatação do código, função que pertence exclusivamente ao Prettier.
+
+## Estratégia
+- utilizar o formato moderno Flat Config (eslint.config.mjs);
+- manter uma configuração base pequena e reutilizável;
+- criar especializações para frameworks quando necessário (Next.js, NestJS, etc.);
+- evitar configurações excessivamente grandes ou copiadas de terceiros;
+- reutilizar a configuração por meio de packages compartilhados.
+
+## Separação de responsabilidades
+| Ferramenta | Responsabilidade          |
+| ---------- | ------------------------- |
+| TypeScript | Segurança de tipos        |
+| ESLint     | Qualidade e boas práticas |
+| Prettier   | Formatação                |
+
+## Evolução
+A configuração deverá evoluir seguindo a mesma arquitetura adotada para o TypeScript:
+```
+config-eslint/
+
+base
+↓
+next
+↓
+nest
+```
 
 ---
 
