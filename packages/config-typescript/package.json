@@ -1,0 +1,14 @@
+{
+  "name": "@bairu/config-typescript",
+  "version": "0.1.0",
+  "description": "Shared TypeScript configurations for the Bairu monorepo.",
+  "private": true,
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "configuration",
+    "monorepo"
+  ],
+  "author": "Luciana Kyoko",
+  "license": "UNLICENSED"
+}
