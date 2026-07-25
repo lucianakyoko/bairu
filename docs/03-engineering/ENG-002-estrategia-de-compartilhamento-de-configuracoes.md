@@ -335,9 +335,86 @@ Novas configurações somente serão adicionadas quando houver necessidade real 
 
 # 9. Estratégia para Tailwind CSS
 
-**Status:** Planejado
+## Objetivo
+Centralizar a configuração do Tailwind CSS utilizada por todas as aplicações do monorepo Bairu, garantindo consistência visual, reutilização de configurações e evolução controlada do Design System.
 
-Será documentado quando a configuração compartilhada do Tailwind CSS for implementada.
+O objetivo não é apenas compartilhar uma configuração do Tailwind, mas estabelecer uma única fonte de verdade para a identidade visual da plataforma.
+
+## Filosofia
+O Tailwind CSS será utilizado como a camada técnica responsável por implementar o Design System do Bairu.
+
+As decisões relacionadas à aparência da plataforma deverão ser centralizadas na configuração compartilhada, evitando que aplicações definam cores, tipografia, espaçamentos ou outros aspectos visuais de forma independente.
+
+O Design System representa decisões de produto, e não preferências individuais de desenvolvimento.
+
+Sempre que possível, componentes deverão utilizar tokens semânticos em vez de valores específicos.
+
+## Estratégia
+A configuração compartilhada será disponibilizada através do package:
+
+```
+packages/
+└── config-tailwind
+```
+
+Esse package será responsável por concentrar toda a configuração compartilhada do Tailwind utilizada pelo monorepo.
+
+Entre os elementos previstos para essa configuração estão:
+
+- tema compartilhado;
+- tokens de cores;
+- tipografia;
+- espaçamentos;
+- raios de borda;
+- sombras;
+- breakpoints;
+- extensões futuras do Design System.
+
+Todas as aplicações deverão reutilizar essa configuração.
+
+## Separação de responsabilidades
+Cada ferramenta do monorepo possui uma responsabilidade específica.
+| Ferramenta   | Responsabilidade                |
+| ------------ | ------------------------------- |
+| TypeScript   | Segurança de tipos e compilação |
+| ESLint       | Qualidade de código             |
+| Prettier     | Formatação automática           |
+| Tailwind CSS | Implementação do Design System  |
+
+O Tailwind não define regras de negócio nem componentes reutilizáveis.
+
+Sua responsabilidade é disponibilizar a infraestrutura visual sobre a qual os componentes serão construídos.
+
+
+## Princípios
+A configuração compartilhada seguirá os seguintes princípios:
+
+- utilizar tokens semânticos em vez de valores específicos;
+- centralizar toda a identidade visual da plataforma;
+- evitar duplicação de configurações entre aplicações;
+- permitir evolução do Design System sem alterações distribuídas pelo código;
+- priorizar consistência visual em todo o monorepo.
+
+## Evolução
+Inicialmente, o package será responsável apenas pela configuração compartilhada do Tailwind.
+
+Estrutura prevista:
+```
+config-tailwind/
+
+├── package.json
+├── tailwind.config.ts
+└── README.md
+```
+
+Conforme o crescimento do projeto, essa configuração servirá como base para os componentes reutilizáveis do Design System.
+
+No futuro, o package @bairu/ui consumirá essa configuração para construir componentes compartilhados, mantendo toda a identidade visual da plataforma centralizada em uma única fonte de verdade.
+
+## Diretriz arquitetural
+Sempre que uma decisão visual puder ser centralizada no Design System, ela deverá ser implementada na configuração compartilhada do Tailwind, e não diretamente nas aplicações consumidoras.
+
+Qs aplicações consomem o Design System, elas não o definem.
 
 ---
 
