@@ -284,6 +284,13 @@ Essas decisões serão introduzidas conforme necessidade real do produto.
 
 ---
 
+# Melhorias futuras
+
+□ Criar preset nextjs.json no package config-typescript
+□ Refatorar apps/web para utilizar o preset compartilhado
+
+---
+
 # Documentação relacionada
 
 - ADR-001 — Adoção do Monorepo
