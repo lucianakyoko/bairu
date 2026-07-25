@@ -418,7 +418,38 @@ Qs aplicações consomem o Design System, elas não o definem.
 
 ---
 
-# 10. Referências
+# 10. Estratégia para Validação compartilhada (Husky + Commitlint)
+## Objetivo
+O monorepo do Bairu adotará validações automáticas durante o fluxo de desenvolvimento para garantir consistência, qualidade do código e padronização do histórico de commits.
+
+As validações devem ocorrer antes que alterações sejam incorporadas ao repositório, reduzindo a necessidade de correções posteriores e aumentando a confiabilidade do código compartilhado.
+
+## Princípios
+**Qualidade antes do repositório**: Nenhum código deverá ser commitado sem passar pelas validações mínimas definidas pelo projeto.
+**Automação**: Validações repetitivas devem ser executadas automaticamente.O desenvolvedor não deve depender de memória ou disciplina para manter a qualidade do código.
+**Feedback rápido**: As validações devem ocorrer durante o desenvolvimento, antes do push, fornecendo retorno imediato sempre que possível.
+**Histórico consistente**: Todas as mensagens de commit deverão seguir o padrão Conventional Commits para facilitar rastreabilidade, versionamento e entendimento da evolução do projeto.
+
+## Ferramentas adotadas
+O projeto utilizará:
+
+- Husky para gerenciamento de Git Hooks;
+- Commitlint para validação das mensagens de commit.
+
+Novas ferramentas poderão ser adicionadas futuramente conforme a evolução da plataforma.
+
+## Responsabilidades
+**Husky**
+* executar validações durante o fluxo de commit;
+* impedir commits que violem as regras definidas pelo projeto.
+
+**Commitlint**
+* validar mensagens de commit;
+* garantir aderência ao padrão Conventional Commits.
+
+---
+
+# Referências
 
 - ADR-001 — Adoção do Monorepo
 - ADR-002 — Adoção do pnpm Workspaces
