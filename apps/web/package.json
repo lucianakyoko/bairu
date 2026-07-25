@@ -1,0 +1,10 @@
+{
+  "name": "@bairu/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bairu web application",
+  "license": "UNLICENSED",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}

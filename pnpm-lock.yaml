@@ -220,6 +220,8 @@ importers:
         specifier: ^2.10.6
         version: 2.10.6
 
+  apps/web: {}
+
   packages/config-eslint:
     devDependencies:
       eslint:
