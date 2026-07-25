@@ -1,0 +1,17 @@
+{
+  "name": "@bairu/config-prettier",
+  "version": "0.1.0",
+  "description": "Shared Prettier configuration for the Bairu monorepo.",
+  "private": true,
+  "keywords": [
+    "prettier",
+    "configuration",
+    "monorepo"
+  ],
+  "author": "Luciana Kyoko",
+  "license": "UNLICENSED",
+  "type": "module",
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  }
+}

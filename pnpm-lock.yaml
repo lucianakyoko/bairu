@@ -220,6 +220,12 @@ importers:
         specifier: ^8.65.0
         version: 8.65.0(eslint@10.7.0)(typescript@6.0.3)
 
+  packages/config-prettier:
+    devDependencies:
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
+
   packages/config-typescript: {}
 
 packages:
@@ -572,6 +578,11 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
@@ -991,6 +1002,8 @@ snapshots:
   picomatch@4.0.5: {}
 
   prelude-ls@1.2.1: {}
+
+  prettier@3.9.6: {}
 
   punycode@2.3.1: {}
 
