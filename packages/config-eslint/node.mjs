@@ -1,3 +1,3 @@
-import base from './base.mjs';
+import base from "./base.mjs";
 
 export default [...base];

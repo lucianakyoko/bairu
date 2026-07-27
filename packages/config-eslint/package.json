@@ -15,8 +15,8 @@
     "typescript-eslint": "^8.65.0"
   },
   "exports": {
-  "./base": "./base.mjs",
-  "./next": "./next.mjs",
-  "./node": "./node.mjs"
-}
+    "./base": "./base.mjs",
+    "./next": "./next.mjs",
+    "./node": "./node.mjs"
+  }
 }
