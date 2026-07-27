@@ -1,24 +1,24 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Bairu",
-    template: "%s | Bairu",
+    default: 'Bairu',
+    template: '%s | Bairu',
   },
   description:
-    "Conectando pessoas aos negócios, serviços e oportunidades da sua cidade.",
+    'Conectando pessoas aos negócios, serviços e oportunidades da sua cidade.',
 };
 
 export default function RootLayout({

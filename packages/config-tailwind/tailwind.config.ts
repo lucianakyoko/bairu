@@ -1,7 +1,7 @@
-import type { Config } from 'tailwindcss';
-import theme from './theme';
+import type { Config } from "tailwindcss";
+import theme from "./theme";
 
-const config: Omit<Config, 'content'> = {
+const config: Omit<Config, "content"> = {
   theme,
 };
 

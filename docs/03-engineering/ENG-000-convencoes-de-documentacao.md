@@ -85,18 +85,18 @@ Esta decisão foi tomada considerando que:
 
 Cada tipo de conteúdo utiliza um idioma específico.
 
-| Contexto | Idioma |
-|----------|---------|
-| Código-fonte | Inglês |
-| Classes, funções e variáveis | Inglês |
-| Commits | Inglês |
-| README | Inglês |
-| ADRs | Português |
-| Documentos de Engenharia | Português |
-| Documentos de Arquitetura | Português |
-| Documentação de Banco de Dados | Português |
-| Documentação de APIs | Português |
-| Comentários de código | Evitar; quando necessários, Inglês |
+| Contexto                       | Idioma                             |
+| ------------------------------ | ---------------------------------- |
+| Código-fonte                   | Inglês                             |
+| Classes, funções e variáveis   | Inglês                             |
+| Commits                        | Inglês                             |
+| README                         | Inglês                             |
+| ADRs                           | Português                          |
+| Documentos de Engenharia       | Português                          |
+| Documentos de Arquitetura      | Português                          |
+| Documentação de Banco de Dados | Português                          |
+| Documentação de APIs           | Português                          |
+| Comentários de código          | Evitar; quando necessários, Inglês |
 
 ---
 

@@ -17,7 +17,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "format": "turbo run format",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky",
     "commitlint": "commitlint"
   },
@@ -33,6 +34,7 @@
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "husky": "^9.1.7",
+    "prettier": "^3.9.6",
     "turbo": "^2.10.6"
   }
 }

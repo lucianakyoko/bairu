@@ -33,6 +33,7 @@ O fluxo será dividido em:
 # Arquitetura do fluxo
 
 O fluxo atual:
+
 ```
 git commit
 ↓
@@ -66,6 +67,7 @@ Responsabilidades:
 ---
 
 ## Commitlint
+
 Responsável pela validação das mensagens de commit.
 
 O projeto utiliza o padrão Conventional Commits como convenção para mensagens.
@@ -77,6 +79,7 @@ Responsabilidades:
 - facilitar rastreabilidade das alterações.
 
 Exemplos válidos:
+
 ```
 feat(web): add authentication page
 
@@ -155,21 +158,25 @@ Packages exclusivamente de configuração não precisam implementar scripts pró
 ---
 
 # Princípios adotados
+
 ## Qualidade antes da integração
+
 Alterações devem passar pelas validações mínimas antes de serem incorporadas ao histórico do projeto.
 
 ## Automação acima de processos manuais
+
 Validações repetitivas devem ser executadas automaticamente para reduzir dependência de ações humanas.
 
 ## Responsabilidade única
+
 Cada ferramenta possui uma responsabilidade específica:
 
-| Ferramenta | Responsabilidade |
-|---|---|
-| Husky | Executar hooks Git |
-| ESLint | Qualidade e análise estática |
-| Prettier | Padronização de código |
-| Commitlint | Padronização das mensagens |
+| Ferramenta | Responsabilidade             |
+| ---------- | ---------------------------- |
+| Husky      | Executar hooks Git           |
+| ESLint     | Qualidade e análise estática |
+| Prettier   | Padronização de código       |
+| Commitlint | Padronização das mensagens   |
 
 ---
 

@@ -239,6 +239,7 @@ Essa estratégia garante que melhorias realizadas na configuração base sejam a
 ---
 
 # 7. Estratégia para ESLint
+
 ## Objetivo
 
 Centralizar as regras de qualidade de código utilizadas por todas as aplicações e packages do monorepo.
@@ -250,6 +251,7 @@ O ESLint é responsável por validar a qualidade do código, identificar más pr
 Ele não é responsável pela formatação do código, função que pertence exclusivamente ao Prettier.
 
 ## Estratégia
+
 - utilizar o formato moderno Flat Config (eslint.config.mjs);
 - manter uma configuração base pequena e reutilizável;
 - criar especializações para frameworks quando necessário (Next.js, NestJS, etc.);
@@ -257,6 +259,7 @@ Ele não é responsável pela formatação do código, função que pertence exc
 - reutilizar a configuração por meio de packages compartilhados.
 
 ## Separação de responsabilidades
+
 | Ferramenta | Responsabilidade          |
 | ---------- | ------------------------- |
 | TypeScript | Segurança de tipos        |
@@ -264,7 +267,9 @@ Ele não é responsável pela formatação do código, função que pertence exc
 | Prettier   | Formatação                |
 
 ## Evolução
+
 A configuração deverá evoluir seguindo a mesma arquitetura adotada para o TypeScript:
+
 ```
 config-eslint/
 
@@ -278,17 +283,21 @@ nest
 ---
 
 # 8. Estratégia para Prettier
+
 ## Objetivo
+
 Centralizar as configurações de formatação de código utilizadas por todas as aplicações e packages do monorepo Bairu.
 O objetivo é garantir que todo o projeto siga um único padrão visual, reduzindo discussões sobre estilo de código e mantendo o histórico do Git mais limpo e consistente.
 
 ## Filosofia
+
 O Prettier é responsável exclusivamente pela formatação automática do código.
 Sua função é eliminar decisões subjetivas relacionadas ao estilo de escrita, permitindo que a equipe concentre seu tempo na arquitetura, lógica de negócio e qualidade do software.
 No Bairu, a configuração do Prettier será compartilhada entre todas as aplicações e packages, garantindo uma experiência consistente durante todo o desenvolvimento.
 A configuração deverá permanecer simples, utilizando o mínimo possível de opções customizadas e priorizando o comportamento padrão da ferramenta sempre que possível.
 
 ## Estratégia
+
 A configuração compartilhada será disponibilizada através do package:
 
 ```
@@ -300,7 +309,9 @@ Esse package será responsável por fornecer uma única configuração reutiliz�
 Todas as aplicações e packages deverão consumir essa configuração, evitando duplicação de arquivos e divergências entre projetos.
 
 ## Separação de responsabilidades
+
 Cada ferramenta possui uma responsabilidade bem definida dentro do fluxo de desenvolvimento do Bairu.
+
 | Ferramenta | Responsabilidade                                       |
 | ---------- | ------------------------------------------------------ |
 | TypeScript | Segurança de tipos e validação durante a compilação    |
@@ -312,11 +323,13 @@ O Prettier não será utilizado para validar regras de qualidade, assim como o E
 Essa separação mantém as responsabilidades bem definidas e reduz conflitos entre ferramentas.
 
 ## Formatação automática
+
 O fluxo de desenvolvimento do projeto deverá privilegiar a formatação automática do código.
 Sempre que possível, os editores utilizados pela equipe deverão executar o Prettier automaticamente ao salvar um arquivo.
 Dessa forma, todos os desenvolvedores trabalham sobre um código visualmente consistente, independentemente de preferências pessoais de formatação.
 
 ## Evolução
+
 A configuração deverá evoluir conforme o crescimento do monorepo, mantendo uma única fonte de verdade para todas as regras de formatação.
 
 A estrutura prevista é:
@@ -336,11 +349,13 @@ Novas configurações somente serão adicionadas quando houver necessidade real 
 # 9. Estratégia para Tailwind CSS
 
 ## Objetivo
+
 Centralizar a configuração do Tailwind CSS utilizada por todas as aplicações do monorepo Bairu, garantindo consistência visual, reutilização de configurações e evolução controlada do Design System.
 
 O objetivo não é apenas compartilhar uma configuração do Tailwind, mas estabelecer uma única fonte de verdade para a identidade visual da plataforma.
 
 ## Filosofia
+
 O Tailwind CSS será utilizado como a camada técnica responsável por implementar o Design System do Bairu.
 
 As decisões relacionadas à aparência da plataforma deverão ser centralizadas na configuração compartilhada, evitando que aplicações definam cores, tipografia, espaçamentos ou outros aspectos visuais de forma independente.
@@ -350,6 +365,7 @@ O Design System representa decisões de produto, e não preferências individuai
 Sempre que possível, componentes deverão utilizar tokens semânticos em vez de valores específicos.
 
 ## Estratégia
+
 A configuração compartilhada será disponibilizada através do package:
 
 ```
@@ -373,7 +389,9 @@ Entre os elementos previstos para essa configuração estão:
 Todas as aplicações deverão reutilizar essa configuração.
 
 ## Separação de responsabilidades
+
 Cada ferramenta do monorepo possui uma responsabilidade específica.
+
 | Ferramenta   | Responsabilidade                |
 | ------------ | ------------------------------- |
 | TypeScript   | Segurança de tipos e compilação |
@@ -385,8 +403,8 @@ O Tailwind não define regras de negócio nem componentes reutilizáveis.
 
 Sua responsabilidade é disponibilizar a infraestrutura visual sobre a qual os componentes serão construídos.
 
-
 ## Princípios
+
 A configuração compartilhada seguirá os seguintes princípios:
 
 - utilizar tokens semânticos em vez de valores específicos;
@@ -396,9 +414,11 @@ A configuração compartilhada seguirá os seguintes princípios:
 - priorizar consistência visual em todo o monorepo.
 
 ## Evolução
+
 Inicialmente, o package será responsável apenas pela configuração compartilhada do Tailwind.
 
 Estrutura prevista:
+
 ```
 config-tailwind/
 
@@ -412,6 +432,7 @@ Conforme o crescimento do projeto, essa configuração servirá como base para o
 No futuro, o package @bairu/ui consumirá essa configuração para construir componentes compartilhados, mantendo toda a identidade visual da plataforma centralizada em uma única fonte de verdade.
 
 ## Diretriz arquitetural
+
 Sempre que uma decisão visual puder ser centralizada no Design System, ela deverá ser implementada na configuração compartilhada do Tailwind, e não diretamente nas aplicações consumidoras.
 
 Qs aplicações consomem o Design System, elas não o definem.
@@ -419,18 +440,22 @@ Qs aplicações consomem o Design System, elas não o definem.
 ---
 
 # 10. Estratégia para Validação compartilhada (Husky + Commitlint)
+
 ## Objetivo
+
 O monorepo do Bairu adotará validações automáticas durante o fluxo de desenvolvimento para garantir consistência, qualidade do código e padronização do histórico de commits.
 
 As validações devem ocorrer antes que alterações sejam incorporadas ao repositório, reduzindo a necessidade de correções posteriores e aumentando a confiabilidade do código compartilhado.
 
 ## Princípios
+
 **Qualidade antes do repositório**: Nenhum código deverá ser commitado sem passar pelas validações mínimas definidas pelo projeto.
 **Automação**: Validações repetitivas devem ser executadas automaticamente.O desenvolvedor não deve depender de memória ou disciplina para manter a qualidade do código.
 **Feedback rápido**: As validações devem ocorrer durante o desenvolvimento, antes do push, fornecendo retorno imediato sempre que possível.
 **Histórico consistente**: Todas as mensagens de commit deverão seguir o padrão Conventional Commits para facilitar rastreabilidade, versionamento e entendimento da evolução do projeto.
 
 ## Ferramentas adotadas
+
 O projeto utilizará:
 
 - Husky para gerenciamento de Git Hooks;
@@ -439,13 +464,16 @@ O projeto utilizará:
 Novas ferramentas poderão ser adicionadas futuramente conforme a evolução da plataforma.
 
 ## Responsabilidades
+
 **Husky**
-* executar validações durante o fluxo de commit;
-* impedir commits que violem as regras definidas pelo projeto.
+
+- executar validações durante o fluxo de commit;
+- impedir commits que violem as regras definidas pelo projeto.
 
 **Commitlint**
-* validar mensagens de commit;
-* garantir aderência ao padrão Conventional Commits.
+
+- validar mensagens de commit;
+- garantir aderência ao padrão Conventional Commits.
 
 ---
 

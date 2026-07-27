@@ -1,4 +1,4 @@
-import colors from 'tailwindcss/colors';
+import colors from "tailwindcss/colors";
 
 export const palette = {
   primary: colors.teal,
@@ -62,17 +62,17 @@ const theme = {
   },
 
   borderRadius: {
-    sm: '0.125rem',
-    md: '0.375rem',
-    lg: '0.5rem',
-    xl: '0.75rem',
-    full: '9999px',
+    sm: "0.125rem",
+    md: "0.375rem",
+    lg: "0.5rem",
+    xl: "0.75rem",
+    full: "9999px",
   },
 
   shadows: {
-    sm: '',
-    md: '',
-    lg: '',
+    sm: "",
+    md: "",
+    lg: "",
   },
 };
 

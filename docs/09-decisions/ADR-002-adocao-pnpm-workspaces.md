@@ -52,7 +52,7 @@ O pnpm será responsável por:
 - comunicação entre aplicações e pacotes internos.
 
 A configuração inicial será realizada através do arquivo:
-==> ```pnpm-workspace.yaml``` com a seguinte estrutura:
+==> `pnpm-workspace.yaml` com a seguinte estrutura:
 
 ```yaml
 packages:
@@ -60,14 +60,15 @@ packages:
   - "packages/*"
 ```
 
-Essa configuração define que: ```apps/``` contém aplicações executáveis.
+Essa configuração define que: `apps/` contém aplicações executáveis.
 
 Exemplos:
+
 - aplicações web;
 - APIs;
 - aplicações administrativas.
 
-==> ```packages/``` contém bibliotecas e recursos compartilhados.
+==> `packages/` contém bibliotecas e recursos compartilhados.
 
 Exemplos:
 
@@ -79,6 +80,7 @@ Exemplos:
 ---
 
 # Motivações
+
 ## Eficiência no gerenciamento de dependências
 
 O pnpm utiliza uma abordagem baseada em armazenamento global e links simbólicos, evitando duplicação desnecessária de pacotes entre projetos.
@@ -90,6 +92,7 @@ Isso proporciona:
 - maior consistência entre projetos.
 
 ## Melhor experiência em monorepos
+
 A escolha pelo pnpm Workspaces não elimina a responsabilidade de definir limites claros entre aplicações e pacotes. A organização arquitetural continuará sendo guiada por domínio e responsabilidade, conforme definido no ADR-001.
 
 O pnpm possui suporte nativo a workspaces, permitindo:
@@ -107,6 +110,7 @@ O pnpm possui excelente integração com Turborepo, ferramenta escolhida no Bair
 - pipelines de desenvolvimento.
 
 A combinação:
+
 ```
 pnpm
  +
@@ -117,9 +121,10 @@ fornece uma base moderna para construção e manutenção do monorepo.
 
 ## Reprodutibilidade dos ambientes
 
-O arquivo: ```pnpm-lock.yaml``` garante que todos os ambientes utilizem versões consistentes das dependências.
+O arquivo: `pnpm-lock.yaml` garante que todos os ambientes utilizem versões consistentes das dependências.
 
 Isso reduz problemas como:
+
 - "funciona na minha máquina";
 - divergência entre ambientes;
 - instalações inconsistentes.
@@ -127,8 +132,11 @@ Isso reduz problemas como:
 ---
 
 # Alternativas Consideradas
+
 ## npm Workspaces
+
 ### Descrição
+
 Solução nativa do npm para gerenciamento de múltiplos pacotes dentro de um único repositório.
 
 ### Motivos para não escolher
@@ -140,10 +148,13 @@ Apesar de atender aos requisitos básicos, apresenta limitações quando compara
 - experiência menos madura em projetos complexos.
 
 ## Yarn Workspaces
+
 ### Descrição
+
 Solução amplamente utilizada para gerenciamento de monorepos JavaScript/TypeScript.
 
 ### Motivos para não escolher
+
 Embora seja uma solução consolidada, o pnpm apresentou vantagens consideradas mais adequadas ao cenário do Bairu:
 
 - melhor eficiência de armazenamento;
@@ -153,6 +164,7 @@ Embora seja uma solução consolidada, o pnpm apresentou vantagens consideradas 
 ---
 
 # Consequências Positivas
+
 A adoção do pnpm Workspaces permite:
 
 - gerenciamento centralizado de dependências;
@@ -165,6 +177,7 @@ A adoção do pnpm Workspaces permite:
 ---
 
 # Consequências Negativas
+
 A decisão também apresenta alguns custos:
 
 - necessidade de conhecimento específico sobre pnpm;
@@ -174,6 +187,7 @@ A decisão também apresenta alguns custos:
 ---
 
 # Considerações Futuras
+
 Caso o Bairu cresça significativamente, novas necessidades poderão surgir, como:
 
 - pipelines avançados de CI/CD;
@@ -186,7 +200,7 @@ Essas evoluções deverão ser avaliadas através de novos ADRs.
 ---
 
 # Referências
+
 - pnpm Documentation
 - pnpm Workspaces Documentation
 - Turborepo Documentation
-

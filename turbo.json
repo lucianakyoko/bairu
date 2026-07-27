@@ -4,10 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        ".next/**"
-      ]
+      "outputs": ["dist/**", ".next/**"]
     },
 
     "dev": {
@@ -21,9 +18,7 @@
 
     "test": {
       "dependsOn": ["^test"],
-      "outputs": [
-        "coverage/**"
-      ]
+      "outputs": ["coverage/**"]
     },
 
     "format": {

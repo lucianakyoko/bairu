@@ -1,7 +1,9 @@
 # Bairu
+
 Connecting people with local businesses, professionals and opportunities through technology.
 
 ---
+
 > 🚧 Bairu is currently under active development.
 >
 > This repository contains the source code, architecture decisions and engineering documentation for the project.
@@ -19,9 +21,11 @@ The platform helps local businesses showcase their products and services, enable
 More than a digital directory, Bairu was created with the vision of strengthening local connections through technology, making neighborhoods more connected and helping valuable opportunities become visible.
 
 ## Vision
+
 To become the platform people naturally think of when they need to discover businesses, professionals and opportunities in their own community.
 
 ## Why Bairu?
+
 Every city has incredible businesses, skilled professionals and valuable opportunities that often remain invisible.
 
 People struggle to find trusted electricians, plumbers, restaurants, mechanics or local services.
@@ -37,4 +41,3 @@ Bairu was born in São Miguel Arcanjo, a small city in the state of São Paulo, 
 The idea emerged from a simple observation: many local businesses and skilled professionals offer excellent products and services but remain difficult to discover, while residents often struggle to find reliable local solutions.
 
 Although it started with a local vision, Bairu is being designed as a scalable platform that can support communities of different sizes.
-

@@ -42,7 +42,7 @@ O repositório será organizado utilizando:
 
 A estrutura seguirá uma separação baseada em responsabilidades:
 
-## ```/apps```
+## `/apps`
 
 Responsável por aplicações executáveis.
 
@@ -53,7 +53,7 @@ Exemplos:
 - painel administrativo;
 - aplicações mobile.
 
-## ```packages/```
+## `packages/`
 
 Responsável por código compartilhado entre aplicações.
 
@@ -64,7 +64,7 @@ Exemplos:
 - bibliotecas internas;
 - tipos e utilitários.
 
-## ```docs/```
+## `docs/`
 
 Responsável pela documentação técnica e decisões do projeto.
 
@@ -114,7 +114,6 @@ Exemplo:
 bairu-web
 bairu-api
 bairu-admin
-
 
 ### Motivos para não escolher
 

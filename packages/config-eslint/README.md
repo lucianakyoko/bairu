@@ -68,4 +68,3 @@ A interface pública será definida conforme novas configurações forem sendo i
 - ENG-002 — Estratégia de Compartilhamento de Configurações
 
 ---
-

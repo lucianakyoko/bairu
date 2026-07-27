@@ -78,4 +78,3 @@ A configuração seguirá os seguintes princípios:
 - ENG-002 — Estratégia de Compartilhamento de Configurações
 
 ---
-

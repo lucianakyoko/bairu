@@ -13,6 +13,7 @@ Seu objetivo é eliminar duplicação de configuração entre aplicações, gara
 ---
 
 ## Responsabilidade
+
 Este package é responsável exclusivamente pelas configurações do Tailwind CSS.
 
 Ele não contém componentes, código de aplicação nem lógica de negócio.
@@ -40,6 +41,7 @@ config-tailwind/
 Novos arquivos serão adicionados conforme a evolução do projeto.
 
 Exemplo:
+
 ```
 config-tailwind/
 

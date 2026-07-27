@@ -33,8 +33,11 @@ A aplicação seguirá uma arquitetura baseada no App Router do Next.js.
 ---
 
 # Stack adotada
+
 ## Framework
+
 ### Next.js
+
 O Bairu utilizará Next.js como framework principal da aplicação web.
 
 Motivos:
@@ -46,7 +49,9 @@ Motivos:
 - suporte a aplicações escaláveis.
 
 ## Biblioteca de interface
+
 ### React
+
 React será utilizado como biblioteca de construção da interface.
 
 Responsabilidades:
@@ -56,7 +61,9 @@ Responsabilidades:
 - implementação das interações da aplicação.
 
 ## Linguagem
+
 ### TypeScript
+
 A aplicação utilizará TypeScript como linguagem principal.
 
 Objetivos:
@@ -68,11 +75,12 @@ Objetivos:
 
 A configuração será herdada do package:
 
-```@bairu/config-typescript```
+`@bairu/config-typescript`
 
 ---
 
 # Arquitetura de renderização
+
 A aplicação utilizará os recursos de Server Components do Next.js através do App Router.
 
 A estratégia inicial será:
@@ -90,6 +98,7 @@ Motivos:
 ---
 
 # Estrutura de diretórios
+
 A aplicação seguirá inicialmente:
 
 ```
@@ -102,8 +111,8 @@ styles/
 public/
 ```
 
-
 Responsabilidades:
+
 - **app**: Responsável pelas rotas e composição das páginas.
 - **components**: Componentes reutilizáveis específicos da aplicação.
 - **lib**: Funções auxiliares, integrações e configurações internas.
@@ -113,27 +122,30 @@ Responsabilidades:
 ---
 
 # Integração com packages compartilhados
+
 A aplicação deverá consumir as configurações centralizadas:
 
 ## TypeScript
-```@bairu/config-typescript```
+
+`@bairu/config-typescript`
 
 Responsável por:
+
 - regras do compilador;
 - padrões de linguagem.
 
-
 ## ESLint
-```@bairu/config-eslint```
+
+`@bairu/config-eslint`
 
 Responsável por:
 
 - qualidade de código;
 - análise estática.
 
-
 ## Prettier
-```@bairu/config-prettier```
+
+`@bairu/config-prettier`
 
 Responsável por:
 
@@ -141,7 +153,8 @@ Responsável por:
 - consistência visual do código.
 
 ## Tailwind CSS
-```@bairu/config-tailwind```
+
+`@bairu/config-tailwind`
 
 Responsável por:
 
@@ -152,6 +165,7 @@ Responsável por:
 ---
 
 # Estratégia de estilos
+
 A aplicação utilizará Tailwind CSS como solução principal de estilização.
 
 A abordagem seguirá:
@@ -160,12 +174,14 @@ A abordagem seguirá:
 - evitar valores arbitrários espalhados;
 - priorizar componentes reutilizáveis.
 
-A identidade visual deverá evoluir centralizada no package: ```@bairu/config-tailwind```
+A identidade visual deverá evoluir centralizada no package: `@bairu/config-tailwind`
 
 ---
 
 # Biblioteca de componentes
+
 ## shadcn/ui
+
 O Bairu utilizará shadcn/ui como base para construção dos componentes de interface.
 
 A biblioteca será utilizada como uma coleção de componentes reutilizáveis baseados em:
@@ -192,6 +208,7 @@ Os componentes do shadcn/ui deverão:
 Inicialmente, os componentes serão mantidos dentro da aplicação web.
 
 Exemplo:
+
 ```
 apps/web/
 
@@ -203,12 +220,14 @@ components/
 ```
 
 A extração para um package compartilhado de UI será considerada futuramente quando houver necessidade real de reutilização entre aplicações.
+
 ```
 packages/
 └── ui
 ```
 
 ## Princípios adotados
+
 O projeto evitará criar componentes próprios quando uma solução existente do shadcn/ui atender ao requisito.
 
 Novos componentes deverão ser criados quando:
@@ -220,7 +239,9 @@ Novos componentes deverão ser criados quando:
 ---
 
 # Biblioteca de ícones
+
 ## Lucide Icons
+
 O Bairu utilizará Lucide Icons como biblioteca oficial de ícones da aplicação web.
 
 Motivos:
@@ -242,7 +263,6 @@ A aplicação deverá evitar:
 - utilização de múltiplas bibliotecas de ícones;
 - ícones inconsistentes entre telas.
 
-
 ## Padronização
 
 Tamanho, espessura e cores dos ícones deverão seguir os padrões definidos pelos componentes e tokens visuais do Design System.
@@ -250,6 +270,7 @@ Tamanho, espessura e cores dos ícones deverão seguir os padrões definidos pel
 ---
 
 # Responsabilidades da aplicação web
+
 A aplicação web será responsável por:
 
 - experiência dos usuários;
@@ -270,6 +291,7 @@ Essas responsabilidades pertencem ao backend.
 ---
 
 # Estratégias futuras
+
 A aplicação poderá evoluir com:
 
 - sistema de componentes compartilhados;

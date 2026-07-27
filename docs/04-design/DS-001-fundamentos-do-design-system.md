@@ -1,6 +1,7 @@
 # DS-001 — Fundamentos do Design System
 
 ## Objetivo
+
 Definir os princípios que orientam a identidade visual do Bairu e estabelecer uma base consistente para a construção de interfaces ao longo da evolução da plataforma.
 
 Este documento representa a visão de longo prazo do Design System e serve como referência para decisões relacionadas à experiência visual do produto.
@@ -8,6 +9,7 @@ Este documento representa a visão de longo prazo do Design System e serve como 
 ---
 
 ## O que é o Design System do Bairu?
+
 O Design System do Bairu é o conjunto de princípios, decisões e padrões que orientam a construção da interface da plataforma.
 
 Seu objetivo é garantir consistência visual, facilitar a evolução do produto e proporcionar uma experiência previsível para usuários e desenvolvedores.
@@ -17,6 +19,7 @@ Mais do que uma coleção de componentes, o Design System representa decisões c
 ---
 
 ## Filosofia
+
 O Design System do Bairu será guiado pelos seguintes valores:
 
 **Simplicidade**: A interface deve ser intuitiva, limpa e objetiva, evitando complexidade desnecessária.
@@ -32,6 +35,7 @@ O Design System do Bairu será guiado pelos seguintes valores:
 ---
 
 ## Responsabilidades
+
 O Design System é responsável por definir:
 
 - identidade visual da plataforma;
@@ -52,9 +56,11 @@ O Design System não é responsável por:
 ---
 
 ## Tokens fundamentais
+
 A primeira versão do Design System será construída sobre cinco grupos principais de tokens.
 
 #### Cores
+
 Representam o significado visual dos elementos da interface.
 
 Os componentes deverão utilizar tokens semânticos, evitando referências diretas a valores de cor.
@@ -73,6 +79,7 @@ Exemplos:
 - Border
 
 #### Tipografia
+
 Define os papéis utilizados para comunicação textual.
 
 Exemplos:
@@ -85,17 +92,21 @@ Exemplos:
 - Label
 
 #### Espaçamento
+
 Utilizar preferencialmente a escala oficial do Tailwind CSS, evitando valores arbitrários.
 
 #### Raios de borda
+
 Os componentes deverão utilizar uma escala consistente de arredondamento.
 
 #### Sombras
+
 Os níveis de profundidade deverão ser limitados a uma pequena quantidade de sombras reutilizáveis.
 
 ---
 
 ## Princípios de implementação
+
 O Design System seguirá algumas regras fundamentais.
 
 - Utilizar tokens semânticos em vez de valores fixos.
@@ -108,6 +119,7 @@ O Design System seguirá algumas regras fundamentais.
 ---
 
 ## Relação com Tailwind CSS
+
 O Tailwind CSS é a tecnologia escolhida para implementar o Design System do Bairu.
 
 A configuração compartilhada do Tailwind representa a implementação técnica das decisões documentadas neste Design System.
@@ -117,6 +129,7 @@ Sempre que possível, alterações visuais deverão ser realizadas na configura�
 ---
 
 ## Estratégia de cores
+
 O Design System do Bairu utiliza as escalas oficiais disponibilizadas pelo Tailwind CSS como base para construção da identidade visual da plataforma.
 
 Essa decisão reduz a complexidade de manutenção, aproveita escalas amplamente testadas pela comunidade e mantém flexibilidade para futuras evoluções do Design System.
@@ -126,6 +139,7 @@ As aplicações nunca deverão consumir diretamente essas escalas. Toda utiliza�
 ---
 
 ## Estratégia de Tipografia
+
 A tipografia do Bairu será organizada por papéis semânticos, e não por tamanhos de fonte.
 
 O objetivo é permitir que componentes expressem a função do conteúdo, enquanto o Design System define sua representação visual.
@@ -149,11 +163,13 @@ Os tamanhos, pesos, alturas de linha e famílias tipográficas serão definidos 
 ---
 
 ### Estratégia de espaçamento
+
 Utilizar a escala oficial do Tailwind.
 
 ---
 
 ## Estratégia de Border Radius
+
 O Design System do Bairu utiliza uma escala controlada de arredondamento para manter consistência visual entre os componentes da plataforma.
 
 Os componentes não devem definir valores arbitrários de border-radius.
@@ -173,6 +189,7 @@ O objetivo é equilibrar uma identidade visual acolhedora com uma interface prof
 ---
 
 ## Estratégia de Sombras
+
 As sombras do Design System do Bairu são utilizadas exclusivamente para comunicar profundidade e hierarquia entre elementos da interface.
 
 Sombras não devem ser utilizadas apenas como recurso decorativo.
@@ -190,6 +207,7 @@ O objetivo é manter a interface limpa, consistente e de fácil manutenção.
 ---
 
 ## Evolução
+
 Este documento será expandido conforme o crescimento do projeto.
 
 Versões futuras poderão incluir:
