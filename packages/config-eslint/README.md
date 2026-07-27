@@ -46,7 +46,7 @@ config-eslint/
 
 ├── eslint.config.mjs
 ├── next.mjs
-├── nest.mjs
+├── node.mjs
 └── README.md
 ```
 
