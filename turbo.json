@@ -16,6 +16,10 @@
       "dependsOn": ["^lint"]
     },
 
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+
     "test": {
       "dependsOn": ["^test"],
       "outputs": ["coverage/**"]
