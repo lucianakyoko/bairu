@@ -297,6 +297,9 @@ importers:
       "@bairu/config-prettier":
         specifier: workspace:*
         version: link:../../packages/config-prettier
+      "@bairu/config-tailwind":
+        specifier: workspace:*
+        version: link:../../packages/config-tailwind
       "@bairu/config-typescript":
         specifier: workspace:*
         version: link:../../packages/config-typescript
@@ -336,11 +339,7 @@ importers:
 
   packages/config-prettier: {}
 
-  packages/config-tailwind:
-    devDependencies:
-      tailwindcss:
-        specifier: ^4.3.3
-        version: 4.3.3
+  packages/config-tailwind: {}
 
   packages/config-typescript: {}
 

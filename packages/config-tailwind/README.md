@@ -1,29 +1,43 @@
 # @bairu/config-tailwind
 
-Configurações compartilhadas do Tailwind CSS utilizadas pelas aplicações e packages do monorepo Bairu.
+Configuração compartilhada do Tailwind CSS utilizada pelas aplicações do monorepo Bairu.
 
 ---
 
 ## Objetivo
 
-Este package centraliza todas as configurações do Tailwind CSS compartilhadas pelo projeto.
+Este package centraliza os tokens visuais compartilhados do Design System do Bairu.
 
-Seu objetivo é eliminar duplicação de configuração entre aplicações, garantir consistência na interface, padronizar o sistema de design e facilitar a evolução da plataforma à medida que novos serviços forem sendo adicionados.
+Seu objetivo é garantir consistência visual entre aplicações, eliminar duplicação de definições de tema e facilitar a evolução da identidade visual da plataforma à medida que novos produtos e serviços forem sendo adicionados.
 
 ---
 
 ## Responsabilidade
 
-Este package é responsável exclusivamente pelas configurações do Tailwind CSS.
+Este package é responsável exclusivamente pela definição do tema compartilhado do Tailwind CSS.
 
-Ele não contém componentes, código de aplicação nem lógica de negócio.
+Ele não contém componentes, lógica de negócio nem código de aplicação.
 
-Exemplos de configurações que poderão existir neste package:
+Sua responsabilidade é disponibilizar uma fonte única de verdade para os tokens de design utilizados em todo o monorepo.
 
-- configuração base do tema;
-- tokens de design (cores, tipografia, espaçamentos, sombras, etc.);
-- presets compartilhados;
-- plugins utilizados em comum pelas aplicações.
+Exemplos de elementos definidos neste package:
+
+- cores semânticas;
+- raios de borda;
+- tipografia;
+- espaçamentos;
+- sombras;
+- demais tokens visuais do Design System.
+
+---
+
+## Arquitetura
+
+O projeto utiliza a abordagem **CSS-first** introduzida no Tailwind CSS v4.
+
+Os tokens de design são definidos em arquivos CSS utilizando a diretiva `@theme`, permitindo que qualquer aplicação do monorepo compartilhe exatamente a mesma identidade visual.
+
+Essa estratégia reduz duplicação de configuração, simplifica a manutenção e mantém os tokens independentes de frameworks específicos.
 
 ---
 
@@ -31,24 +45,27 @@ Exemplos de configurações que poderão existir neste package:
 
 Atualmente, o package possui a seguinte organização:
 
-```
+```text
 config-tailwind/
 
+├── index.css
+├── theme.css
 ├── package.json
-├── README.md
+└── README.md
 ```
 
-Novos arquivos serão adicionados conforme a evolução do projeto.
+À medida que o Design System evoluir, novos arquivos poderão ser adicionados.
 
 Exemplo:
 
-```
+```text
 config-tailwind/
 
+├── index.css
+├── theme.css
+├── utilities.css
+├── animations.css
 ├── package.json
-├── base.ts
-├── preset.ts
-├── theme.ts
 └── README.md
 ```
 
@@ -56,19 +73,29 @@ config-tailwind/
 
 ## Como utilizar
 
-As aplicações do monorepo deverão reutilizar as configurações disponibilizadas por este package.
+As aplicações do monorepo deverão importar este package para compartilhar os mesmos tokens visuais.
 
-Exemplo futuro:
+Exemplo:
 
-```
-import preset from "@bairu/config-tailwind/preset";
-
-export default {
-  presets: [preset],
-};
+```css
+@import "tailwindcss";
+@import "@bairu/config-tailwind";
 ```
 
-A interface pública será definida conforme novas configurações forem sendo implementadas.
+A aplicação passa automaticamente a utilizar o tema compartilhado definido pelo Design System do Bairu.
+
+---
+
+## Princípios
+
+O package segue os seguintes princípios:
+
+- utilizar CSS como fonte de verdade para os tokens do Design System;
+- manter apenas uma definição para cada token visual;
+- desacoplar os tokens de qualquer framework específico;
+- permitir reutilização por qualquer aplicação do monorepo;
+- facilitar a evolução incremental do Design System.
+
 ---
 
 ## Documentação relacionada
@@ -77,5 +104,12 @@ A interface pública será definida conforme novas configurações forem sendo i
 - ADR-002 — Adoção do pnpm Workspaces
 - ENG-001 — Organização de Packages
 - ENG-002 — Estratégia de Compartilhamento de Configurações
+- DS-001 — Fundamentos do Design System
 
 ---
+
+## Status
+
+🚧 Em evolução.
+
+A primeira versão do tema compartilhado está sendo construída durante a Sprint 2 e servirá como base para todos os componentes do Design System do Bairu.

@@ -1,0 +1,26 @@
+@theme {
+  --color-primary: #0d9488;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #334155;
+  --color-secondary-foreground: #ffffff;
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+
+  --color-border: #e2e8f0;
+
+  --color-success: #059669;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+  --color-info: #0284c7;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}

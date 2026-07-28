@@ -1,7 +1,7 @@
 {
   "name": "@bairu/config-tailwind",
   "version": "0.1.0",
-  "description": "Shared Tailwind CSS configuration for the Bairu monorepo.",
+  "description": "Shared design tokens for the Bairu Design System.",
   "private": true,
   "keywords": [
     "tailwindcss",
@@ -12,7 +12,8 @@
   "author": "Luciana Kyoko",
   "license": "UNLICENSED",
   "type": "module",
-  "devDependencies": {
-    "tailwindcss": "^4.3.3"
+  "exports": {
+    ".": "./index.css",
+    "./theme.css": "./theme.css"
   }
 }
