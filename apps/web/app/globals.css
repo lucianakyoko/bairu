@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import '@bairu/config-tailwind';
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
