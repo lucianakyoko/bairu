@@ -11,7 +11,9 @@
   ],
   "author": "Luciana Kyoko",
   "license": "UNLICENSED",
+  "type": "module",
   "devDependencies": {
+    "eslint-config-next": "16.2.11",
     "typescript-eslint": "^8.65.0"
   },
   "exports": {
