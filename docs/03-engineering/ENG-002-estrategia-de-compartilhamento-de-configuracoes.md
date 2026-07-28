@@ -109,6 +109,13 @@ packages/
 
 Cada package deve conter apenas os arquivos necessários para cumprir sua responsabilidade.
 
+## Arquitetura dos packages de configuração
+
+- Ferramentas executáveis (eslint, prettier, typescript) são instaladas na raiz do monorepo.
+- Packages config-* não executam comandos; eles apenas exportam configurações.
+- Cada package deve expor uma API pública por meio de exports.
+- Aplicações consomem apenas a API pública dos packages compartilhados.
+
 ---
 
 # 5. Estratégia de Evolução
