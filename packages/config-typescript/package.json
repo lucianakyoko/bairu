@@ -10,5 +10,11 @@
     "monorepo"
   ],
   "author": "Luciana Kyoko",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    "./base": "./base.json",
+    "./next": "./next.json",
+    "./node": "./node.json"
+  }
 }

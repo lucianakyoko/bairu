@@ -46,7 +46,8 @@ config-typescript/
 
 ├── base.json
 ├── next.json
-├── nest.json
+├── node.json
+├── package.json
 └── README.md
 ```
 
@@ -64,7 +65,7 @@ Exemplo futuro:
 }
 ```
 
-A interface pública será definida conforme novas configurações forem sendo implementadas.
+A interface pública do package é disponibilizada através dos exports definidos em seu package.json, permitindo que aplicações consumam apenas os presets necessários.
 
 ---
 
@@ -76,9 +77,3 @@ A interface pública será definida conforme novas configurações forem sendo i
 - ENG-002 — Estratégia de Compartilhamento de Configurações
 
 ---
-
-## Status
-
-🚧 Em desenvolvimento.
-
-A primeira configuração compartilhada (`base.json`) será implementada nas próximas etapas da Sprint 2.
