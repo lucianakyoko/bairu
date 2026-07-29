@@ -1,7 +1,3 @@
 export function Hero() {
-  return(
-    <section>
-      Hero
-    </section>
-  )
+  return <section>Hero</section>;
 }

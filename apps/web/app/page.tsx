@@ -9,7 +9,6 @@ import { Mission } from '@/components/homepage/Mission';
 import { CTA } from '@/components/homepage/CTA';
 import { Footer } from '@/components/layout/Footer';
 
-
 export default function HomePage() {
   return (
     <>

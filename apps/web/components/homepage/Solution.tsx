@@ -1,7 +1,3 @@
 export function Solution() {
-  return(
-    <section>
-      Solution
-    </section>
-  )
+  return <section>Solution</section>;
 }

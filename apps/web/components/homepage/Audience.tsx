@@ -1,7 +1,3 @@
 export function Audience() {
-  return(
-    <section>
-      Audience
-    </section>
-  )
+  return <section>Audience</section>;
 }

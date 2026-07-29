@@ -1,7 +1,3 @@
 export function CTA() {
-  return(
-    <section>
-      CTA
-    </section>
-  )
+  return <section>CTA</section>;
 }

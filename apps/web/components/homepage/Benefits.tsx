@@ -1,7 +1,3 @@
 export function Benefits() {
-  return(
-    <section>
-      Benefits
-    </section>
-  )
+  return <section>Benefits</section>;
 }

@@ -1,7 +1,3 @@
 export function Mission() {
-  return(
-    <section>
-      Mission
-    </section>
-  )
+  return <section>Mission</section>;
 }
