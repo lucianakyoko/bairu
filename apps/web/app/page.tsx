@@ -5,7 +5,7 @@ import { Solution } from '@/components/homepage/Solution/Solution';
 import { Benefits } from '@/components/homepage/Benefits/Benefits';
 import { HowItWorks } from '@/components/homepage/HowItWorks/HowItWorks';
 import { Audience } from '@/components/homepage/Audience/Audience';
-import { Mission } from '@/components/homepage/Mission';
+import { Mission } from '@/components/homepage/Mission/Mission';
 import { CTA } from '@/components/homepage/CTA';
 import { Footer } from '@/components/layout/Footer';
 
