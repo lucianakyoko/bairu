@@ -3,7 +3,7 @@ import { Hero } from '@/components/homepage/Hero';
 import { Problem } from '@/components/homepage/Problem/Problem';
 import { Solution } from '@/components/homepage/Solution/Solution';
 import { Benefits } from '@/components/homepage/Benefits/Benefits';
-import { HowItWorks } from '@/components/homepage/HowItWorks';
+import { HowItWorks } from '@/components/homepage/HowItWorks/HowItWorks';
 import { Audience } from '@/components/homepage/Audience';
 import { Mission } from '@/components/homepage/Mission';
 import { CTA } from '@/components/homepage/CTA';
