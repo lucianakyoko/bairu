@@ -1,0 +1,21 @@
+import Link from 'next/link';
+
+import { footerNavigation } from './navigation';
+
+export function FooterNavigation() {
+  return (
+    <nav aria-label="Links do rodapé" className="flex flex-col gap-3">
+      <h3 className="text-sm font-semibold text-foreground">Navegação</h3>
+
+      {footerNavigation.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}

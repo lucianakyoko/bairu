@@ -7,7 +7,7 @@ import { HowItWorks } from '@/components/homepage/HowItWorks/HowItWorks';
 import { Audience } from '@/components/homepage/Audience/Audience';
 import { Mission } from '@/components/homepage/Mission/Mission';
 import { CTA } from '@/components/homepage/CTA/CTA';
-import { Footer } from '@/components/layout/Footer';
+import { Footer } from '@/components/layout/Footer/Footer';
 
 export default function HomePage() {
   return (
