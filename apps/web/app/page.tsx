@@ -1,4 +1,4 @@
-import { Header } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header/Header';
 import { Hero } from '@/components/homepage/Hero';
 import { Problem } from '@/components/homepage/Problem/Problem';
 import { Solution } from '@/components/homepage/Solution/Solution';
