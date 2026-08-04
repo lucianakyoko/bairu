@@ -10,7 +10,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="container mx-auto space-y-12 px-6 py-16">
-        <div className="grid gap-12 md:grid-cols-3">
+        <div className="grid gap-12 md:grid-cols-3 justify-items-center">
           <FooterBrand />
 
           <FooterNavigation />

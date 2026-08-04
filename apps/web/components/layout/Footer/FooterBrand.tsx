@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export function FooterBrand() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-col items-center md:items-start">
       <Link
         href="/"
         aria-label="Ir para a página inicial do Bairu"
@@ -12,7 +12,7 @@ export function FooterBrand() {
         <Logo size={44} />
       </Link>
 
-      <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+      <p className="max-w-sm text-sm text-center md:text-left leading-relaxed text-muted-foreground">
         Fortalecendo negócios e comunidades locais.
       </p>
     </div>

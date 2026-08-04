@@ -15,7 +15,7 @@ export function BeforeState() {
         </p>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {beforePlatforms.map((platform) => (
           <BrandIcon
             key={platform.name}

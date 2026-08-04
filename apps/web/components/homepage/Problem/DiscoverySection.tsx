@@ -8,7 +8,7 @@ export function DiscoverySection() {
   return (
     <>
       <div className="py-8 text-center">
-        <div className="inline-flex items-center gap-4 rounded-full bg-background px-6 py-3">
+        <div className="flex flex-col md:flex-row items-center md:justify-center gap-4 rounded-full bg-background px-6 py-3">
           <Icon icon={Info} className="text-outline" />
 
           <p className="font-semibold">

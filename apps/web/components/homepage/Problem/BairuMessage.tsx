@@ -3,7 +3,7 @@ import { Verified } from 'lucide-react';
 
 export function BairuMessage() {
   return (
-    <div className="space-y-6 rounded-2xl border border-primary bg-surface p-8 shadow-xl">
+    <div className="space-y-6 rounded-2xl border border-primary/40 bg-surface p-8 shadow-xl">
       <div className="space-y-3 text-center">
         <h3 className="text-2xl font-semibold text-primary">
           O Bairu reúne todas as informações do seu negócio em um único perfil
@@ -18,7 +18,7 @@ export function BairuMessage() {
       </div>
 
       <div className="rounded-xl bg-background p-4">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-col items-center justify-center gap-2">
           <Icon icon={Verified} className="text-outline" />
 
           <p className="text-center text-sm font-semibold text-primary">

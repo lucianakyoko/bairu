@@ -16,7 +16,7 @@ export function CTAContent() {
         negócio quando realmente precisarem de você.
       </p>
 
-      <div className="mt-10">
+      <div className="mt-10 w-full">
         <CTAButton />
       </div>
 
