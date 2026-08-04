@@ -9,7 +9,7 @@ export function BenefitCard({ benefit }: BenefitCardProps) {
   const Icon = benefit.icon;
 
   return (
-    <Card className="h-full rounded-2xl border-border shadow-sm">
+    <Card className="h-full rounded-2xl border-border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
       <CardContent className="flex flex-col gap-6 p-8">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5">
           <Icon className="h-6 w-6 text-primary" />

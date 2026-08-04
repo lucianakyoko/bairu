@@ -7,7 +7,8 @@ export function FooterBrand() {
       <Link
         href="/"
         aria-label="Ir para a página inicial do Bairu"
-        className="inline-flex transition-opacity hover:opacity-90 items-center gap-2"
+        title="Bairu"
+        className="inline-flex hover:scale-[1.02] transition-all duration-200 items-center gap-2"
       >
         <Logo size={48} />
       </Link>

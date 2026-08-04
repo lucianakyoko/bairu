@@ -27,7 +27,7 @@ export function Footer() {
               href="https://lucianakyoko.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-primary transition-colors hover:underline"
+              className="font-medium text-primary transition-all duration-200 hover:underline"
             >
               Luciana Kyoko
             </Link>
