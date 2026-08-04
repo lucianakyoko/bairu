@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button';
 export function HeaderActions() {
   return (
     <div className="hidden items-center gap-4 lg:flex">
-      <Button variant="ghost" asChild>
+      <Button
+        variant="outline"
+        asChild
+        className="border-primary text-primary hover:bg-primary/10"
+      >
         <Link href="/login">Entrar</Link>
       </Button>
 

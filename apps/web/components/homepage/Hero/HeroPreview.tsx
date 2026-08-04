@@ -1,7 +1,11 @@
+import { BusinessProfilePreview } from '@/components/homepage/Hero/BusinessProfilePreview';
+
 export function HeroPreview() {
   return (
-    <div className="flex h-[500px] w-full items-center justify-center rounded-xl border border-border bg-surface">
-      <span className="text-text-muted">Preview do perfil</span>
+    <div className="relative flex items-center justify-center">
+      <div className="w-full max-w-md rotate-2 transition-transform duration-300 hover:rotate-0">
+        <BusinessProfilePreview />
+      </div>
     </div>
   );
 }

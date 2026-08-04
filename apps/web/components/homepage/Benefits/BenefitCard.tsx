@@ -9,18 +9,16 @@ export function BenefitCard({ benefit }: BenefitCardProps) {
   const Icon = benefit.icon;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full rounded-2xl border-border shadow-sm">
       <CardContent className="flex flex-col gap-6 p-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5">
           <Icon className="h-6 w-6 text-primary" />
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xl font-semibold text-foreground">
-            {benefit.title}
-          </h3>
+          <h3 className="text-xl font-semibold text-text">{benefit.title}</h3>
 
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-base leading-7 text-text-muted">
             {benefit.description}
           </p>
         </div>

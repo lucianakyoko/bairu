@@ -12,7 +12,7 @@ export function HeaderNavigation() {
         <Link
           key={item.href}
           href={item.href}
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="text-sm font-semibold text-text hover:text-text-muted transition-colors duration-200"
         >
           {item.label}
         </Link>

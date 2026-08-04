@@ -3,7 +3,7 @@ import { StoreIcon } from 'lucide-react';
 
 export function ProfileMockup() {
   return (
-    <div className="rounded-2xl border border-primary/60 bg-primary/10 p-6 md:p-8">
+    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-8">
       <div className="space-y-4">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">

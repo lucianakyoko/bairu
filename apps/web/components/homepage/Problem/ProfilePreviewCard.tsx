@@ -6,7 +6,7 @@ export function ProfilePreviewCard() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
-          <Icon icon={Check} className="text-outline" size={22} />
+          <Icon icon={Check} className="text-outline text-success" size={22} />
         </div>
         <h4 className="font-semibold text-text">
           Perfil profissional completo
@@ -14,7 +14,7 @@ export function ProfilePreviewCard() {
       </div>
 
       <div className="w-full space-y-3">
-        <div className="rounded-xl border border-primary/20 bg-surface p-4 shadow-md">
+        <div className="rounded-xl border border-primary/20 bg-surface p-4 shadow-lg">
           <div className="flex gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Icon icon={Scissors} className="text-outline" />

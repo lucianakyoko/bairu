@@ -5,7 +5,7 @@ export function SolutionHeader() {
         O Bairu organiza sua presença digital em um único lugar.
       </h2>
 
-      <p className="text-base leading-7 md:text-lg md:leading-8">
+      <p className="text-base leading-7 text-text-muted sm:text-lg sm:leading-8">
         Tudo o que um cliente precisa saber sobre seu negócio reunido em uma
         página profissional.
       </p>

@@ -5,7 +5,7 @@ import { HeroPreview } from '@/components/homepage/Hero/HeroPreview';
 export function Hero() {
   return (
     <section className="bg-background py-24">
-      <div className="mx-auto grid max-w-7xl gap-16 px-6 lg:grid-cols-2 lg:items-center">
+      <div className="mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
         <div className="space-y-8">
           <HeroHeading
             title="Seu negócio merece ser encontrado."

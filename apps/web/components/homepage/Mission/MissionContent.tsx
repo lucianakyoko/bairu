@@ -1,7 +1,7 @@
 export function MissionContent() {
   return (
     <div className="space-y-8 text-center">
-      <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/70">
+      <span className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-foreground/70">
         Nossa missão
       </span>
 
@@ -9,7 +9,7 @@ export function MissionContent() {
         Fortalecer os negócios locais para fortalecer a comunidade.
       </h2>
 
-      <div className="mx-auto max-w-3xl space-y-6 text-lg leading-8 text-primary-foreground/90">
+      <div className="mx-auto max-w-3xl space-y-6 text-base leading-7 sm:text-lg sm:leading-8 text-primary-foreground/85">
         <p>
           Muitos negócios aqui na cidade ainda permanecem invisíveis na
           internet.

@@ -8,7 +8,7 @@ interface DiscoveryChannelCardProps {
 
 export function DiscoveryChannelCard({ channel }: DiscoveryChannelCardProps) {
   return (
-    <article className="glass-card flex flex-col items-center gap-3 rounded-xl border border-outline-variant p-6 text-center">
+    <article className="flex flex-col items-center gap-3 rounded-2xl border border-outline-variant border-secondary/10 p-6 text-center shadow-md">
       {channel.type === 'brand' ? (
         <BrandIcon brand={channel.brand} size={32} />
       ) : (
