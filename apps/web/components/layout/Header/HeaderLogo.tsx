@@ -6,7 +6,6 @@ export function HeaderLogo() {
     <Link
       href="/"
       aria-label="Ir para a página inicial do Bairu"
-      title="Bairu"
       className="hover:opacity-90 transition-all duration-200 hover:scale-[1.02] flex items-center gap-2"
     >
       <Logo />

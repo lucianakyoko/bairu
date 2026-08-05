@@ -1,7 +1,7 @@
 export const navigationItems = [
   {
     label: 'Buscar negócios',
-    href: '/',
+    href: '/negocios',
   },
   {
     label: 'Para negócios',

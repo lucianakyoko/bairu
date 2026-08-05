@@ -1,7 +1,7 @@
 export const footerNavigation = [
   {
     label: 'Buscar negócios',
-    href: '/',
+    href: '/negocios',
   },
   {
     label: 'Para negócios',

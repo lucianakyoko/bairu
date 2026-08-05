@@ -1,5 +1,5 @@
 import { Icon } from '@/components/icons/Icon';
-import { Check, Scissors } from 'lucide-react';
+import { Check, Scissors, Star } from 'lucide-react';
 
 export function ProfilePreviewCard() {
   return (
@@ -8,9 +8,7 @@ export function ProfilePreviewCard() {
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
           <Icon icon={Check} className="text-outline text-success" size={22} />
         </div>
-        <h4 className="font-semibold text-text">
-          Perfil profissional completo
-        </h4>
+        <p className="font-semibold text-text">Perfil profissional completo</p>
       </div>
 
       <div className="w-full space-y-3">
@@ -28,9 +26,10 @@ export function ProfilePreviewCard() {
               </p>
 
               <div className="mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined fill text-sm text-warning">
+                {/* <span className="material-symbols-outlined fill text-sm text-warning">
                   star
-                </span>
+                </span> */}
+                <Icon icon={Star} className="text-warning" />
 
                 <span className="text-xs">4.9 (42 avaliações)</span>
               </div>
@@ -38,11 +37,11 @@ export function ProfilePreviewCard() {
           </div>
 
           <div className="mt-3 flex gap-2 border-t border-border pt-3">
-            <span className="rounded bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">
+            <span className="rounded bg-primary/10 px-2 py-1 text-[10px] sm:text-[12px] font-bold text-primary">
               ABERTO AGORA
             </span>
 
-            <span className="rounded bg-background px-2 py-1 text-[10px] font-bold text-text-muted">
+            <span className="rounded bg-background px-2 py-1 text-[10px] sm:text-[12px] font-bold text-text-muted">
               RUA DAS FLORES, 45
             </span>
           </div>

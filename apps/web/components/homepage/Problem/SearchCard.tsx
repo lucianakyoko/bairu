@@ -23,7 +23,7 @@ export function SearchCard() {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-danger/10">
             <Icon icon={CircleX} className="text-outline text-danger" />
           </div>
-          <h4 className="font-semibold text-text">Seu negócio não apareceu.</h4>
+          <p className="font-semibold text-text">Seu negócio não apareceu.</p>
         </div>
 
         <p className="text-sm text-text-muted">

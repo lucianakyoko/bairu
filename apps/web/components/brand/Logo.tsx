@@ -12,7 +12,7 @@ export function Logo({ size = 40, showName = true, className }: LogoProps) {
     <div className="inline-flex items-center gap-3">
       <Image
         src="/brand/logo-mark.svg"
-        alt="Bairu"
+        alt={showName ? '' : 'Bairu'}
         width={size}
         height={size}
         priority

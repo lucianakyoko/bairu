@@ -22,18 +22,18 @@ export function BusinessProfilePreview() {
 
 function PreviewHeader() {
   return (
-    <div className="border-b border-border bg-primary/5 p-6">
+    <div className="border-b border-border bg-background p-6">
       <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
           <Store className="h-8 w-8 text-primary" />
         </div>
 
         <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-text">Padaria do Centro</h3>
+          <p className="text-lg font-semibold text-text">Padaria do Centro</p>
 
-          <p className="text-sm text-text-muted">Padaria • Café</p>
+          <p className="text-sm text-text">Padaria • Café</p>
 
-          <span className="inline-flex rounded-full bg-success/10 px-2 py-1 text-xs font-medium text-success">
+          <span className="inline-flex rounded-full bg-success/5 px-2 py-1 text-xs font-medium text-success">
             Aberto agora
           </span>
         </div>

@@ -4,7 +4,7 @@ export function HeroActions() {
   return (
     <div className="flex flex-wrap gap-4 w-full">
       <Button
-        className="w-full sm:w-auto cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+        className="w-full sm:w-auto cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.98] bg-primary text-primary-foreground"
         size="lg"
       >
         Cadastrar meu negócio
