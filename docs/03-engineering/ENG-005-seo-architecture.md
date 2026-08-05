@@ -142,6 +142,13 @@ Será utilizada a geração automática do App Router através do arquivo:
 
 `app/sitemap.ts`
 
+### Evolução futura do sitemap
+
+- Adicionar páginas institucionais.
+- Adicionar categorias.
+- Gerar automaticamente perfis públicos de empresas.
+- Gerar automaticamente páginas de produtos e serviços (caso existam).
+
 ---
 
 ## Robots
