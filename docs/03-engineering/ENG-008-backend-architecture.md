@@ -418,6 +418,8 @@ Segredos não deverão ser versionados no repositório.
 
 Variáveis de ambiente deverão ser utilizadas para valores específicos de cada ambiente.
 
+O backend utiliza CommonJS como formato de módulo de runtime devido à compatibilidade e maturidade do ecossistema NestJS. A adoção de ESM poderá ser reavaliada caso exista uma necessidade concreta.
+
 ---
 
 ## Shared

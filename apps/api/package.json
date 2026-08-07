@@ -1,0 +1,30 @@
+{
+  "name": "@bairu/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bairu backend API",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "lint": "eslint --max-warnings=0 .",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11",
+    "@nestjs/core": "^11",
+    "@nestjs/platform-express": "^11.1.28",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@bairu/config-eslint": "workspace:*",
+    "@bairu/config-prettier": "workspace:*",
+    "@bairu/config-typescript": "workspace:*",
+    "@nestjs/cli": "^11",
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}
