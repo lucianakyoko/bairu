@@ -10,9 +10,9 @@ export function AudienceCard({ audience }: AudienceCardProps) {
   const Icon = audience.icon;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full rounded-2xl border-border shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
       <CardContent className="flex flex-col gap-6 p-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5">
           <Icon className="h-6 w-6 text-primary" />
         </div>
 
@@ -21,7 +21,7 @@ export function AudienceCard({ audience }: AudienceCardProps) {
             {audience.title}
           </h3>
 
-          <p className="text-sm leading-7 text-muted-foreground">
+          <p className="text-base leading-7 text-text-muted">
             {audience.description}
           </p>
         </div>

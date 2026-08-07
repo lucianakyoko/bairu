@@ -1,14 +1,17 @@
+import { FadeUp } from '@/components/animation';
 import { BeforeAfterComparison } from './BeforeAfterComparison';
 import { SolutionHeader } from './SolutionHeader';
 
 export function Solution() {
   return (
-    <section className="bg-background">
-      <div className="mx-auto flex flex-col gap-16 border-none bg-background lg:px-16 py-16">
-        <SolutionHeader />
+    <FadeUp>
+      <section className="bg-background">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 flex flex-col gap-16">
+          <SolutionHeader />
 
-        <BeforeAfterComparison />
-      </div>
-    </section>
+          <BeforeAfterComparison />
+        </div>
+      </section>
+    </FadeUp>
   );
 }

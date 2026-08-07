@@ -3,7 +3,7 @@ import { StoreIcon } from 'lucide-react';
 
 export function ProfileMockup() {
   return (
-    <div className="relative rounded-2xl p-16 bg-primary/10 p-scale-24 border-primary/60">
+    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-8">
       <div className="space-y-4">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
@@ -11,15 +11,15 @@ export function ProfileMockup() {
           </div>
 
           <div className="space-y-1">
-            <div className="h-4 w-32 rounded bg-primary/20" />
-            <div className="h-3 w-48 rounded bg-primary/60" />
+            <div className="h-4 w-24 sm:w-32 rounded bg-primary/20" />
+            <div className="h-3 w-32 sm:w-48 rounded bg-primary/60" />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          <div className="h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
-          <div className="h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
-          <div className="h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
+          <div className="h-12 md:h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
+          <div className="h-12 md:h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
+          <div className="h-12 md:h-16 rounded-lg border border-outline-variant border-primary/40 bg-white" />
         </div>
 
         <div className="h-10 rounded-lg bg-primary" />

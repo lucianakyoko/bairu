@@ -11,13 +11,13 @@ export function AfterState() {
           {afterState.title}
         </span>
 
-        <p className="mt-2 text-on-surface-variant">{afterState.description}</p>
+        <p className="mt-3 text-text-muted">{afterState.description}</p>
       </div>
 
-      <div className="flex items-center gap-2 text-primary">
+      <div className="flex flex-wrap justify-center gap-2 text-primary">
         <Icon icon={CheckCircle2} className="text-outline" size={22} />
 
-        <span className="font-medium">Pronto para ser encontrado</span>
+        <span className="font-semibold">Pronto para ser encontrado</span>
       </div>
     </div>
   );

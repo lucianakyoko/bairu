@@ -1,17 +1,20 @@
 import { DiscoverySection } from './DiscoverySection';
 import { ProblemHeader } from './ProblemHeader';
 import { DiscoveryChannels } from './DiscoveryChannels';
+import { FadeUp } from '@/components/animation';
 
 export function Problem() {
   return (
-    <section className="border-b border-border bg-surface py-16">
-      <div className="container mx-auto space-y-12 px-6">
-        <ProblemHeader />
+    <FadeUp>
+      <section className="border-b border-border bg-surface py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <ProblemHeader />
 
-        <DiscoveryChannels />
+          <DiscoveryChannels />
 
-        <DiscoverySection />
-      </div>
-    </section>
+          <DiscoverySection />
+        </div>
+      </section>
+    </FadeUp>
   );
 }

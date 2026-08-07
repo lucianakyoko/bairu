@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button';
 
 export function CTAButton() {
   return (
-    <Button size="lg" className="gap-2 px-8">
+    <Button
+      size="lg"
+      className="h-12 text-xs sm:text-base gap-2 w-full sm:w-auto sm:min-w-[280px] cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+    >
       Criar meu perfil gratuitamente
       <ArrowRight className="h-4 w-4" />
     </Button>

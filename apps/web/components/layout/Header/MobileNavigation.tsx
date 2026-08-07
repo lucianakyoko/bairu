@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sheet';
 
 import { navigationItems } from './navigation';
+import { Separator } from '@/components/ui/separator';
 
 export function MobileNavigation() {
   return (
@@ -21,10 +22,11 @@ export function MobileNavigation() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="lg:hidden cursor-pointer"
+          title="Abrir menu"
           aria-label="Abrir menu"
         >
-          <Menu className="size-5" />
+          <Menu className="text-text hover:text-primary" />
         </Button>
       </SheetTrigger>
 
@@ -38,7 +40,7 @@ export function MobileNavigation() {
             <Button
               key={item.href}
               variant="ghost"
-              className="justify-start"
+              className="justify-start font-semibold text-text hover:text-text-muted transition-colors duration-200"
               asChild
             >
               <Link href={item.href}>{item.label}</Link>
@@ -46,10 +48,14 @@ export function MobileNavigation() {
           ))}
         </nav>
 
-        <div className="my-6 border-t" />
+        <Separator />
 
         <div className="flex flex-col gap-3">
-          <Button variant="ghost" asChild>
+          <Button
+            variant="ghost"
+            asChild
+            className="border border-primary text-primary hover:bg-primary/10"
+          >
             <Link href="/login">Entrar</Link>
           </Button>
 

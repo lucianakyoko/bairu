@@ -1,17 +1,20 @@
+import { FadeUp } from '@/components/animation';
 import { AudienceFooter } from './AudienceFooter';
 import { AudienceGrid } from './AudienceGrid';
 import { AudienceHeader } from './AudienceHeader';
 
 export function Audience() {
   return (
-    <section className="border-b border-border bg-background py-24">
-      <div className="container mx-auto flex max-w-7xl flex-col gap-16 px-6">
-        <AudienceHeader />
+    <FadeUp>
+      <section className="border-b border-border bg-background py-24">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <AudienceHeader />
 
-        <AudienceGrid />
+          <AudienceGrid />
 
-        <AudienceFooter />
-      </div>
-    </section>
+          <AudienceFooter />
+        </div>
+      </section>
+    </FadeUp>
   );
 }

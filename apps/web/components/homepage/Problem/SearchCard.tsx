@@ -9,8 +9,8 @@ export function SearchCard() {
           O comportamento atual
         </p>
 
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-sm">
-          <Icon icon={Search} className="text-outline" />
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-2 md:p-4 shadow-md">
+          <Icon icon={Search} className="text-outline text-secondary" />
 
           <span className="italic text-text-muted">
             &#34;costureira em São Miguel Arcanjo&#34;
@@ -18,19 +18,18 @@ export function SearchCard() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex h-10 w-14 items-center justify-center rounded-full bg-danger/10">
-          <Icon icon={CircleX} className="text-outline" />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-danger/10">
+            <Icon icon={CircleX} className="text-outline text-danger" />
+          </div>
+          <p className="font-semibold text-text">Seu negócio não apareceu.</p>
         </div>
 
-        <div>
-          <h4 className="font-semibold text-text">Sem resultado útil</h4>
-
-          <p className="text-sm text-text-muted">
-            O cliente encontra informações espalhadas, desatualizadas ou
-            simplesmente não encontra seu negócio.
-          </p>
-        </div>
+        <p className="text-sm text-text-muted">
+          O cliente encontra informações espalhadas, desatualizadas ou
+          simplesmente não encontra seu negócio.
+        </p>
       </div>
     </div>
   );
