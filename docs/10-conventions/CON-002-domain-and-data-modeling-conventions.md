@@ -1,92 +1,182 @@
-# CON-002 — Domain and Data Conventions
+# CON-002 — Domain and Data Modeling Conventions
 
 ## 1. Objetivo
 
-Este documento estabelece as convenções utilizadas para modelagem do domínio e dos dados persistidos pelo Bairu.
+Este documento estabelece as convenções utilizadas pelo Bairu para modelagem do domínio e dos dados persistidos pela plataforma.
 
-Seu objetivo é garantir consistência na definição de entidades, relacionamentos, identificadores, nomenclatura, auditoria, exclusão de registros, valores controlados e dados derivados.
+Seu objetivo é garantir consistência na definição de:
+
+- entidades;
+- atributos;
+- relacionamentos;
+- identificadores;
+- chaves estrangeiras;
+- restrições de integridade;
+- nomenclatura;
+- dados derivados;
+- valores controlados;
+- referências a recursos externos;
+- representação de conceitos temporais.
 
 Estas convenções devem ser consideradas na criação ou alteração de qualquer entidade persistente da plataforma.
 
+As regras gerais de arquitetura estão definidas em:
+
+`CON-001-architecture-conventions.md`
+
+As regras de ciclo de vida, retenção, exclusão e auditoria estão definidas em:
+
+`CON-008-data-lifecycle-and-audit-standards.md`
+
+As regras específicas para mídias estão definidas em:
+
+`CON-007-media-architecture-and-lifecycle-standards.md`
+
+A arquitetura física do banco de dados está definida em:
+
+`DB-001-database-architecture.md`
+
 ---
 
-## 2. Princípios de Modelagem
+# 2. Princípios de Modelagem
 
-A modelagem de dados deve refletir os conceitos e regras reais do domínio.
+A modelagem de dados deve representar os conceitos e regras reais do domínio.
 
-Os seguintes princípios devem ser observados:
+## 2.1. Domínio como fonte da modelagem
 
-### 2.1. Domínio como fonte da modelagem
+Entidades, atributos e relacionamentos devem representar conceitos relevantes para o negócio.
 
-Entidades e relacionamentos devem representar conceitos relevantes para o negócio, e não apenas estruturas técnicas necessárias ao banco de dados.
+A estrutura do banco não deve ser definida exclusivamente a partir de conveniências técnicas do ORM ou da implementação.
 
-### 2.2. Single Source of Truth
+Antes de criar uma entidade, deve ser possível responder:
+
+> Qual conceito do domínio esta entidade representa?
+
+---
+
+## 2.2. Single Source of Truth
 
 Cada informação deve possuir uma única fonte de verdade.
 
-Dados duplicados ou derivados somente devem existir quando houver uma justificativa clara, principalmente relacionada a desempenho.
+Dados duplicados ou derivados somente devem existir quando houver justificativa clara, principalmente relacionada a:
 
-### 2.3. Responsabilidade única
+- desempenho;
+- necessidade de consulta frequente;
+- integração;
+- requisitos operacionais.
+
+Quando um dado for derivado, sua fonte de verdade deverá permanecer identificável e o valor deverá poder ser reconstruído quando necessário.
+
+---
+
+## 2.3. Responsabilidade única
 
 Cada entidade deve representar um conceito bem definido.
 
-Informações pertencentes a diferentes conceitos não devem ser agrupadas apenas por conveniência.
+Informações pertencentes a conceitos diferentes não devem ser agrupadas apenas por conveniência.
 
-### 2.4. Integridade dos dados
-
-Regras que podem ser garantidas pelo banco devem utilizar mecanismos de integridade apropriados, como:
-
-- `NOT NULL`;
-- `UNIQUE`;
-- `FOREIGN KEY`;
-- `CHECK`;
-- índices;
-- constraints.
-
-Regras que dependem de contexto ou comportamento devem permanecer na camada de domínio.
-
-### 2.5. Evolução incremental
-
-A modelagem deve ser suficiente para atender às necessidades atuais sem antecipar estruturas que ainda não possuem uso concreto.
+Por exemplo, informações relacionadas à empresa não devem ser utilizadas para representar diretamente regras pertencentes a avaliações, publicações ou favoritos.
 
 ---
 
-## 3. Convenções de Nomenclatura
+## 2.4. Alta coesão
 
-### 3.1. Classes
+Atributos e regras relacionados ao mesmo conceito devem permanecer próximos.
 
-Classes devem utilizar `PascalCase` e nomes no singular.
-
-| Elemento   | Convenção                 | Exemplo              |
-| ---------- | ------------------------- | -------------------- |
-| Entidade   | PascalCase singular       | `CompanyCatalogItem` |
-| DTO        | PascalCase + `Dto`        | `CreateCompanyDto`   |
-| Controller | PascalCase + `Controller` | `CompanyController`  |
-| Service    | PascalCase + `Service`    | `FeedService`        |
-| Repository | PascalCase + `Repository` | `CompanyRepository`  |
-| Enum       | PascalCase                | `CompanyStatus`      |
-
-### 3.2. Banco de Dados
-
-Objetos persistidos devem utilizar `snake_case`.
-
-| Elemento          | Convenção                  | Exemplo                                |
-| ----------------- | -------------------------- | -------------------------------------- |
-| Tabela            | `snake_case` plural        | `company_catalog_items`                |
-| Coluna            | `snake_case`               | `created_at`                           |
-| Chave estrangeira | `<entity>_id`              | `company_id`                           |
-| Índice            | `idx_<table>_<column>`     | `idx_company_catalog_items_company_id` |
-| Foreign Key       | `fk_<table>_<column>`      | `fk_company_catalog_items_company_id`  |
-| Unique Constraint | `uq_<table>_<column>`      | `uq_companies_slug`                    |
-| Check Constraint  | `ck_<table>_<description>` | `ck_companies_rating_range`            |
-
-As entidades da aplicação permanecem no singular, enquanto as tabelas do banco utilizam plural.
+Uma entidade deve concentrar informações que façam sentido dentro do mesmo contexto de domínio.
 
 ---
 
-## 4. Identificadores
+## 2.5. Baixo acoplamento
 
-Todas as entidades persistentes devem utilizar UUID como identificador primário.
+Entidades não devem incorporar diretamente detalhes de implementação de outros contextos.
+
+Relacionamentos entre conceitos devem ser representados por referências e contratos apropriados.
+
+---
+
+## 2.6. Integridade em múltiplas camadas
+
+A integridade dos dados deve ser protegida tanto pela aplicação quanto pelo banco de dados.
+
+### Aplicação
+
+Responsável por:
+
+- regras de negócio;
+- autorização;
+- validações contextuais;
+- transições de estado;
+- regras que dependem de comportamento.
+
+### Banco de dados
+
+Responsável por:
+
+- integridade referencial;
+- unicidade;
+- nulabilidade;
+- tipos;
+- constraints;
+- integridade estrutural.
+
+Uma camada não deve ser utilizada como substituta da outra.
+
+---
+
+## 2.7. Evolução incremental
+
+A modelagem deve atender às necessidades reais do produto sem antecipar estruturas que ainda não possuem uso concreto.
+
+Novas abstrações devem ser introduzidas quando houver necessidade de domínio, técnica ou produto.
+
+---
+
+# 3. Entidades de Domínio
+
+Uma entidade persistente deve representar um conceito identificável do domínio.
+
+Exemplos do Bairu incluem:
+
+- `User`;
+- `Company`;
+- `Category`;
+- `CompanyCatalogItem`;
+- `FeedPublication`;
+- `CompanyReview`;
+- `Favorite`.
+
+A entidade deve possuir identidade própria quando sua existência puder ser distinguida de outras instâncias do mesmo conceito.
+
+---
+
+## 3.1. Entidade versus atributo
+
+Um conceito deve ser modelado como atributo quando:
+
+- não possui identidade própria;
+- não possui ciclo de vida independente;
+- não precisa ser referenciado individualmente;
+- não possui regras próprias relevantes.
+
+Deve ser considerado como entidade quando:
+
+- possui identidade própria;
+- possui ciclo de vida;
+- possui relacionamentos;
+- possui regras de negócio;
+- precisa ser consultado ou referenciado individualmente;
+- poderá evoluir independentemente.
+
+A decisão deve ser orientada pelo domínio e não apenas pela estrutura atual da interface.
+
+---
+
+# 4. Identidade das Entidades
+
+Todas as entidades persistentes que possuam identidade própria devem utilizar um identificador primário.
+
+No Bairu, o padrão é UUID.
 
 Exemplo:
 
@@ -94,23 +184,156 @@ Exemplo:
 id UUID
 ```
 
-O UUID foi adotado por:
+O identificador primário:
 
-- não expor diretamente a quantidade de registros;
-- reduzir colisões em ambientes distribuídos;
-- facilitar sincronizações;
-- permitir geração de identificadores sem depender exclusivamente do banco;
-- adequar-se à evolução futura da arquitetura.
-
-O identificador primário não deve possuir significado de negócio.
-
-Quando uma entidade possuir um identificador funcional, como slug ou código público, ele deve ser modelado separadamente.
+- não deve possuir significado de negócio;
+- não deve ser utilizado para representar códigos funcionais;
+- deve permanecer estável durante o ciclo de vida da entidade.
 
 ---
 
-## 5. Chaves Estrangeiras
+## 4.1. Justificativa para UUID
 
-Relacionamentos entre entidades devem ser representados por chaves estrangeiras.
+UUID foi adotado por:
+
+- reduzir exposição de informações sobre cardinalidade;
+- reduzir colisões em ambientes distribuídos;
+- facilitar geração de identificadores;
+- facilitar sincronizações;
+- permitir evolução futura da arquitetura;
+- evitar dependência de sequenciamento global do banco.
+
+UUID não substitui identificadores funcionais.
+
+Quando uma entidade possuir um identificador de negócio, este deve ser modelado separadamente.
+
+---
+
+# 5. Identificadores Funcionais
+
+Identificadores com significado de negócio devem ser separados do identificador técnico.
+
+Exemplos:
+
+```text
+id
+slug
+code
+```
+
+O `id` representa a identidade técnica.
+
+Um `slug`, código ou identificador público representa uma necessidade específica do domínio ou da apresentação.
+
+Esses campos podem possuir suas próprias constraints de unicidade.
+
+Exemplo:
+
+```text
+Company
+├── id
+└── slug
+```
+
+O `slug` não substitui o UUID como identificador primário.
+
+---
+
+# 6. Convenções de Nomenclatura
+
+## 6.1. Código da aplicação
+
+Classes, interfaces, tipos e enums devem utilizar `PascalCase`.
+
+Atributos e propriedades devem utilizar `camelCase`.
+
+Exemplos:
+
+```text
+Company
+CompanyCatalogItem
+CompanyRepository
+CompanyStatus
+
+companyId
+createdAt
+publishedAt
+```
+
+---
+
+## 6.2. Classes
+
+| Elemento   | Convenção                 | Exemplo             |
+| ---------- | ------------------------- | ------------------- |
+| Entidade   | PascalCase singular       | `Company`           |
+| DTO        | PascalCase + `Dto`        | `CreateCompanyDto`  |
+| Controller | PascalCase + `Controller` | `CompanyController` |
+| Service    | PascalCase + `Service`    | `CompanyService`    |
+| Repository | PascalCase + `Repository` | `CompanyRepository` |
+| Enum       | PascalCase                | `CompanyStatus`     |
+
+---
+
+## 6.3. Banco de Dados
+
+Objetos persistidos devem utilizar `snake_case`.
+
+| Elemento               | Convenção                  | Exemplo                                |
+| ---------------------- | -------------------------- | -------------------------------------- |
+| Tabela                 | `snake_case` plural        | `company_catalog_items`                |
+| Coluna                 | `snake_case`               | `created_at`                           |
+| Foreign Key            | `<entity>_id`              | `company_id`                           |
+| Índice                 | `idx_<table>_<column>`     | `idx_company_catalog_items_company_id` |
+| Foreign Key Constraint | `fk_<table>_<column>`      | `fk_company_catalog_items_company_id`  |
+| Unique Constraint      | `uq_<table>_<column>`      | `uq_companies_slug`                    |
+| Check Constraint       | `ck_<table>_<description>` | `ck_companies_rating_range`            |
+
+As entidades da aplicação permanecem no singular.
+
+As tabelas do banco utilizam plural.
+
+---
+
+# 7. Atributos
+
+Cada atributo deve possuir significado claro dentro da entidade.
+
+Atributos não devem ser criados apenas para facilitar uma implementação específica.
+
+Antes de adicionar um campo, deve-se avaliar:
+
+- qual conceito ele representa;
+- se é fonte da verdade;
+- se é derivado;
+- se pode ser nulo;
+- qual é sua semântica temporal, quando aplicável;
+- se precisa de índice;
+- se possui regra de unicidade;
+- se deve ser persistido ou calculado.
+
+---
+
+# 8. Nulabilidade
+
+A nulabilidade deve representar uma regra real do domínio.
+
+Um campo deve ser `NOT NULL` quando sua ausência representar um estado inválido para aquela entidade.
+
+Um campo pode ser nullable quando:
+
+- a informação é opcional;
+- o dado ainda não existe;
+- a relação é opcional;
+- a informação somente se torna obrigatória em determinada condição.
+
+Nullable não deve ser utilizado apenas para facilitar o desenvolvimento.
+
+---
+
+# 9. Chaves Estrangeiras
+
+Relacionamentos entre entidades persistentes devem ser representados por Foreign Keys.
 
 Exemplo:
 
@@ -118,96 +341,77 @@ Exemplo:
 company_id UUID
 ```
 
-Quando o relacionamento for obrigatório, a chave estrangeira deverá ser `NOT NULL`.
+Quando o relacionamento for obrigatório:
 
-Quando o relacionamento for opcional, sua nulabilidade deverá representar explicitamente essa regra.
+```text
+company_id NOT NULL
+```
+
+Quando o relacionamento for opcional:
+
+```text
+company_id NULL
+```
+
+A nulabilidade deve refletir a regra de domínio.
 
 Foreign Keys devem ser utilizadas para preservar a integridade referencial do banco.
 
 ---
 
-## 6. Auditoria
+# 10. Cardinalidade
 
-Entidades persistentes devem possuir campos de auditoria quando fizer sentido para seu ciclo de vida.
-
-### 6.1. Campos padrão
-
-| Campo        | Utilização                                   |
-| ------------ | -------------------------------------------- |
-| `created_at` | Momento de criação                           |
-| `updated_at` | Momento da última alteração                  |
-| `deleted_at` | Momento da exclusão lógica, quando aplicável |
-
-`created_at` e `updated_at` são recomendados para entidades persistentes que possuam ciclo de vida operacional.
-
-`deleted_at` somente deve existir quando a entidade utilizar Soft Delete.
-
-### 6.2. Auditoria de usuário
-
-Campos como:
-
-```text
-created_by
-updated_by
-deleted_by
-```
-
-podem ser utilizados quando houver necessidade de rastreabilidade de ações realizadas por usuários.
-
-Esses campos não devem ser adicionados automaticamente a todas as entidades.
-
-A necessidade deve ser avaliada de acordo com o domínio e os requisitos de auditoria.
-
----
-
-## 7. Estratégia de Exclusão
-
-A estratégia de exclusão deve refletir o significado da entidade no domínio.
-
-### 7.1. Hard Delete
-
-Utilizar quando o registro não possuir valor histórico ou quando sua existência deixar de fazer sentido.
+A cardinalidade deve representar explicitamente a relação entre os conceitos.
 
 Exemplos:
 
-- relacionamentos simples;
-- dados temporários;
-- exceções de agenda após seu período de validade.
+```text
+Company
+  └── CompanyCatalogItem
+      1 ─── N
+```
 
-### 7.2. Soft Delete
+ou:
 
-Utilizar quando o registro puder precisar ser recuperado ou possuir valor operacional ou histórico.
+```text
+Company
+  └── profile_media
+      1 ─── 0..1
+```
 
-O Soft Delete não deve ser adotado automaticamente.
+A cardinalidade deve ser definida antes da implementação da relação no ORM.
 
-Uma entidade que utilize Soft Delete deve possuir uma justificativa clara.
+---
 
-### 7.3. Cascade Delete
+## 10.1. Cardinalidade obrigatória
 
-Pode ser utilizado quando a remoção da entidade principal tornar os registros relacionados semanticamente inválidos.
+Quando uma entidade não puder existir sem sua relação, a associação deve ser obrigatória.
+
+Exemplo:
+
+```text
+CompanyCatalogItem
+    └── company_id NOT NULL
+```
+
+---
+
+## 10.2. Cardinalidade opcional
+
+Quando a relação puder não existir, a associação deve ser nullable.
 
 Exemplo:
 
 ```text
 Company
-  └── CompanySocialLink
+    └── cover_media_id NULL
 ```
 
-Se o relacionamento não possuir significado sem a empresa, a exclusão em cascata pode ser apropriada.
-
-### 7.4. Restrict
-
-Deve ser utilizado quando a exclusão da entidade principal puder comprometer a integridade ou o histórico do domínio.
-
-### 7.5. Regra geral
-
-Não utilizar Soft Delete por padrão.
-
-A estratégia deve ser definida individualmente para cada entidade.
+A nulabilidade representa a possibilidade de ausência da relação.
 
 ---
 
-## 8. Entidades de Relacionamento
+# 11. Entidades de Relacionamento
 
 Uma relação entre entidades deve ser modelada como uma entidade própria quando possuir significado de negócio.
 
@@ -217,22 +421,20 @@ Exemplos:
 - `CompanyReview`;
 - `Favorite`.
 
-Essas entidades não são apenas tabelas intermediárias técnicas.
-
-Elas representam conceitos do domínio.
+Essas entidades não devem ser consideradas apenas tabelas intermediárias técnicas quando representarem conceitos relevantes do domínio.
 
 ---
 
-## 9. Quando Criar uma Entidade de Relacionamento
+# 12. Quando Criar uma Entidade de Relacionamento
 
 Uma entidade de relacionamento própria deve ser considerada quando pelo menos uma das condições abaixo for verdadeira:
 
 - possui regras de negócio;
 - possui atributos próprios;
+- possui ciclo de vida;
 - necessita de auditoria;
-- possui ciclo de vida próprio;
 - é consultada diretamente;
-- poderá evoluir futuramente;
+- poderá evoluir;
 - precisa ser referenciada por outras partes do domínio.
 
 Exemplo:
@@ -240,57 +442,61 @@ Exemplo:
 ```text
 User
   │
-  ├── Favorite ── Company
+  ├── Favorite ───── Company
   │
-  └── CompanyReview ── Company
+  └── CompanyReview ─ Company
 ```
 
 ---
 
-## 10. Quando Não Criar uma Entidade de Relacionamento
+# 13. Quando Não Criar uma Entidade de Relacionamento
 
 Uma relação simples pode utilizar uma associação técnica do ORM quando:
 
 - não possui atributos próprios;
 - não possui regras de negócio;
-- não possui ciclo de vida próprio;
+- não possui ciclo de vida;
 - não precisa ser consultada diretamente;
 - não possui necessidade de auditoria;
-- representa apenas uma associação estrutural.
+- representa somente uma associação estrutural.
 
-A decisão deve considerar o domínio atual e a evolução razoavelmente previsível, evitando criar entidades artificiais sem necessidade.
+A decisão deve considerar a necessidade atual e a evolução razoavelmente previsível.
+
+Não devem ser criadas entidades artificiais sem significado no domínio.
 
 ---
 
-## 11. Características das Entidades de Relacionamento
+# 14. Características das Entidades de Relacionamento
 
 Quando uma entidade de relacionamento for criada, recomenda-se:
 
-| Característica | Convenção                                                         |
-| -------------- | ----------------------------------------------------------------- |
-| Identificador  | UUID                                                              |
-| Foreign Keys   | Obrigatórias quando o relacionamento for obrigatório              |
-| Unique         | Utilizar quando impedir duplicidade fizer parte da regra          |
-| Soft Delete    | Evitar                                                            |
-| Hard Delete    | Preferencial                                                      |
-| Cascade        | Utilizar quando o relacionamento perder seu significado com o pai |
-| `created_at`   | Recomendado                                                       |
-| `updated_at`   | Apenas se o relacionamento puder ser alterado                     |
-| `deleted_at`   | Apenas se houver necessidade de histórico                         |
+| Característica | Convenção                                               |
+| -------------- | ------------------------------------------------------- |
+| Identificador  | UUID                                                    |
+| Foreign Keys   | Obrigatórias quando aplicável                           |
+| Unique         | Utilizar quando impedir duplicidade for regra           |
+| Soft Delete    | Não utilizar por padrão                                 |
+| Hard Delete    | Preferencial quando não houver necessidade de histórico |
+| Cascade        | Utilizar quando semanticamente apropriado               |
+| `created_at`   | Recomendado                                             |
+| `updated_at`   | Quando houver alteração do relacionamento               |
+| `deleted_at`   | Somente quando explicitamente necessário                |
+
+As decisões de lifecycle devem seguir `CON-008`.
 
 ---
 
-## 12. Unicidade
+# 15. Unicidade
 
 Constraints `UNIQUE` devem representar regras reais de negócio ou integridade.
 
-Exemplos:
+Exemplo:
 
 ```text
 UNIQUE (company_id, category_id)
 ```
 
-para impedir que uma empresa seja associada duas vezes à mesma categoria.
+impede que uma empresa seja associada duas vezes à mesma categoria.
 
 Outro exemplo:
 
@@ -298,25 +504,28 @@ Outro exemplo:
 UNIQUE (user_id, company_id)
 ```
 
-para impedir múltiplos favoritos do mesmo usuário para a mesma empresa.
+pode impedir múltiplos favoritos do mesmo usuário para a mesma empresa.
 
-A unicidade deve ser garantida no banco sempre que possível, mesmo quando também houver validação na aplicação.
+A unicidade deve ser garantida no banco sempre que possível.
 
-Isso evita inconsistências causadas por condições de corrida.
+A validação na aplicação não substitui a constraint do banco.
+
+Isso é especialmente importante em cenários de concorrência.
 
 ---
 
-## 13. Índices
+# 16. Índices
 
-Índices devem ser criados para consultas relevantes e relacionamentos frequentemente utilizados.
+Índices devem existir quando houver benefício concreto para consultas ou integridade.
 
 Casos comuns:
 
-- foreign keys utilizadas em filtros;
+- Foreign Keys frequentemente utilizadas em filtros;
 - campos utilizados em buscas;
 - campos utilizados em ordenação;
-- combinações de colunas utilizadas frequentemente;
-- constraints de unicidade.
+- combinações de colunas frequentemente consultadas;
+- constraints de unicidade;
+- consultas utilizadas por processos críticos.
 
 Exemplo:
 
@@ -326,17 +535,22 @@ idx_company_catalog_items_company_id
 
 Índices não devem ser adicionados indiscriminadamente.
 
-Cada índice possui custo de armazenamento e pode aumentar o custo de operações de escrita.
+Cada índice possui custo de:
 
-A necessidade de novos índices deve ser avaliada conforme os padrões de consulta da aplicação.
+- armazenamento;
+- escrita;
+- manutenção;
+- complexidade operacional.
+
+Novos índices devem ser avaliados conforme os padrões reais de consulta.
 
 ---
 
-## 14. ENUMs
+# 17. ENUMs
 
-Durante o MVP, conjuntos de valores pequenos, estáveis e controlados devem utilizar ENUMs nativos do PostgreSQL quando apropriado.
+Durante o MVP, conjuntos pequenos e estáveis de valores controlados podem utilizar ENUMs nativos do PostgreSQL quando apropriado.
 
-Exemplo conceitual:
+Exemplo:
 
 ```text
 CompanyStatus
@@ -345,36 +559,175 @@ CompanyStatus
 └── SUSPENDED
 ```
 
-### 14.1. Quando utilizar ENUM
+---
 
-ENUMs são apropriados quando:
+## 17.1. Quando utilizar ENUM
+
+ENUM é apropriado quando:
 
 - o conjunto de valores é pequeno;
 - os valores são estáveis;
-- os valores não precisam ser cadastrados por usuários;
+- os valores não precisam ser cadastrados pelos usuários;
 - não existe necessidade de metadados adicionais;
-- a internacionalização não exige armazenamento adicional.
+- a alteração da lista é pouco frequente.
 
-### 14.2. Evolução para Reference Tables
+---
 
-Caso um conjunto de valores passe a exigir:
+## 17.2. Quando utilizar tabela de referência
+
+Um conjunto de valores deve ser avaliado para migração para uma tabela quando passar a exigir:
 
 - cadastro administrativo;
 - customização;
 - metadados;
 - ordenação configurável;
 - internacionalização;
-- ativação/desativação dinâmica;
+- ativação ou desativação dinâmica;
+- relacionamentos adicionais.
 
-ele deve ser avaliado para migração para uma tabela de domínio.
-
-Essa mudança representa uma alteração na persistência, e não necessariamente uma mudança na regra de negócio.
+Essa decisão deve considerar a natureza do domínio, e não somente a preferência técnica.
 
 ---
 
-## 15. Dados Derivados
+# 18. Estados de Negócio
 
-Dados derivados são informações calculadas a partir de outras entidades e armazenadas para otimizar leituras.
+Estados representam condições relevantes do domínio.
+
+Exemplo:
+
+```text
+CompanyStatus
+├── ACTIVE
+├── INACTIVE
+└── SUSPENDED
+```
+
+Um estado de negócio não deve ser utilizado para representar automaticamente:
+
+- existência física do registro;
+- arquivamento técnico;
+- exclusão física;
+- retenção.
+
+Essas preocupações pertencem ao ciclo de vida definido em `CON-008`.
+
+Uma entidade pode permanecer persistida independentemente de seu estado de negócio.
+
+---
+
+# 19. Datas e Horários
+
+Datas devem possuir semântica explícita.
+
+Quando representarem um instante no tempo, devem ser armazenadas em UTC.
+
+Exemplos:
+
+```text
+created_at
+updated_at
+published_at
+archived_at
+```
+
+Datas relacionadas a calendário local devem preservar a semântica definida pelo domínio.
+
+Não se deve converter automaticamente uma data de calendário para UTC quando isso alterar seu significado.
+
+---
+
+## 19.1. Convenções de nomenclatura temporal
+
+Campos temporais devem utilizar nomes que expressem claramente sua semântica.
+
+Exemplos:
+
+```text
+created_at
+updated_at
+published_at
+starts_at
+expires_at
+archived_at
+```
+
+Evitar campos ambíguos como:
+
+```text
+date
+time
+value
+```
+
+quando o significado puder ser explicitado.
+
+As regras específicas de lifecycle temporal de conteúdos devem permanecer nas convenções do módulo de conteúdo.
+
+---
+
+# 20. Campos de Auditoria Operacional
+
+Entidades persistentes podem utilizar campos operacionais comuns quando fizer sentido.
+
+Os campos mais comuns são:
+
+```text
+created_at
+updated_at
+```
+
+Eles representam:
+
+- momento de criação;
+- momento da última alteração persistida.
+
+Campos como:
+
+```text
+created_by
+updated_by
+```
+
+podem ser utilizados quando houver necessidade de rastrear o responsável pela operação.
+
+Esses campos não devem ser adicionados indiscriminadamente.
+
+A auditoria de operações relevantes é tratada em `CON-008`.
+
+---
+
+# 21. Lifecycle e Exclusão
+
+A modelagem da entidade deve permitir representar seu ciclo de vida quando isso fizer parte do domínio.
+
+Entretanto, este documento não define a política geral de:
+
+- Soft Delete;
+- Hard Delete;
+- arquivamento;
+- retenção;
+- anonimização;
+- auditoria.
+
+Essas regras são definidas em:
+
+`CON-008-data-lifecycle-and-audit-standards.md`
+
+A entidade deve apenas possuir os campos necessários para representar o comportamento definido pelo seu domínio.
+
+Por exemplo, uma entidade que realmente necessite de Soft Delete poderá possuir:
+
+```text
+deleted_at
+```
+
+Mas `deleted_at` não deve ser adicionado automaticamente a todas as entidades.
+
+---
+
+# 22. Dados Derivados
+
+Dados derivados são informações calculadas a partir de outras fontes de verdade.
 
 Exemplo:
 
@@ -386,66 +739,57 @@ ReviewService
       │
       ├── calcula média
       └── calcula quantidade
-             │
-             ▼
-          Company
+              │
+              ▼
+           Company
 ```
 
-A entidade de origem continua sendo a fonte da verdade.
+Exemplos:
+
+```text
+rating_average
+rating_count
+favorites_count
+catalog_items_count
+```
+
+A entidade de origem permanece como fonte da verdade.
 
 ---
 
-## 16. Regras para Dados Derivados
+# 23. Regras para Dados Derivados
 
 Dados derivados devem obedecer às seguintes regras:
 
 1. Não são a fonte da verdade.
 2. Não devem ser editados diretamente por usuários.
-3. Não devem ser expostos como campos editáveis em APIs administrativas.
-4. Devem ser atualizados pela camada de domínio.
-5. Sempre que possível, devem ser atualizados na mesma transação que altera a origem.
-6. Devem poder ser recalculados a partir da fonte da verdade.
+3. Não devem ser tratados como dados primários.
+4. Devem possuir uma fonte de verdade identificável.
+5. Devem poder ser recalculados.
+6. Devem ser atualizados de maneira consistente com sua origem.
+7. Sua existência deve ser justificada por necessidade real.
 
-Essa última característica é fundamental.
-
-Se um valor derivado estiver inconsistente, deve ser possível reconstruí-lo.
+Sempre que o custo de calcular o valor for pequeno, deve-se preferir derivá-lo sob demanda.
 
 ---
 
-## 17. Quando Utilizar Dados Derivados
+# 24. Quando Utilizar Dados Derivados
 
-Dados derivados devem ser utilizados somente quando houver benefício significativo de leitura.
-
-São candidatos quando:
+Dados derivados podem ser utilizados quando:
 
 - são consultados frequentemente;
 - exigem agregações custosas;
-- aparecem em listagens ou buscas de alta frequência;
-- reduzem significativamente a carga do banco.
+- aparecem em listagens de alta frequência;
+- reduzem significativamente a carga do banco;
+- melhoram uma operação crítica de leitura.
 
-Quando o custo da agregação for pequeno, deve-se preferir consultar a fonte da verdade diretamente.
-
----
-
-## 18. Exemplos de Dados Derivados
-
-| Fonte da verdade     | Entidade  | Dados derivados                  |
-| -------------------- | --------- | -------------------------------- |
-| `CompanyReview`      | `Company` | `rating_average`, `rating_count` |
-| `Favorite`           | `Company` | `favorites_count`                |
-| `CompanyCatalogItem` | `Company` | `catalog_items_count`            |
-| `CompanyPromotion`   | `Company` | `active_promotions_count`        |
-| `CompanyEvent`       | `Company` | `upcoming_events_count`          |
-
-Esses exemplos não significam que todos os campos devam existir desde o MVP.
-
-A adoção deve ser baseada na necessidade real de leitura e desempenho.
+Não devem ser criados antecipadamente apenas por previsão de escala.
 
 ---
 
-## 19. Atualização de Dados Derivados
+# 25. Atualização de Dados Derivados
 
-A atualização deve ocorrer na camada de domínio responsável pela operação.
+Quando possível, dados derivados críticos devem ser atualizados na mesma transação que altera sua fonte de verdade.
 
 Exemplo:
 
@@ -460,192 +804,487 @@ ReviewService
       └── atualiza Company
 ```
 
-Sempre que possível, essas operações devem fazer parte da mesma transação.
+Quando a atualização síncrona não for adequada, processos assíncronos poderão ser utilizados.
 
-Eventos assíncronos poderão ser utilizados futuramente quando houver necessidade de desacoplamento ou processamento distribuído.
+Nesse caso, a arquitetura deverá considerar:
 
-No MVP, a consistência transacional deve ser priorizada para indicadores críticos.
+- consistência eventual;
+- reprocessamento;
+- idempotência;
+- recuperação de falhas.
+
+No MVP, consistência transacional deve ser priorizada para indicadores críticos sempre que possível.
 
 ---
 
-## 20. Ciclo de Vida das Entidades de Relacionamento
+# 26. Referências a Recursos Externos
 
-Entidades de relacionamento normalmente possuem ciclo de vida simples:
+Entidades de domínio não devem armazenar diretamente conteúdos pertencentes a sistemas externos.
+
+Isso inclui, por exemplo:
+
+- arquivos;
+- credenciais;
+- objetos de SDK;
+- conexões;
+- tokens de infraestrutura.
+
+Quando uma entidade precisar referenciar um recurso externo, deve armazenar uma referência adequada.
+
+No caso de mídias, a referência deve seguir as regras de:
+
+`CON-007-media-architecture-and-lifecycle-standards.md`
+
+---
+
+# 27. Valores Monetários
+
+Valores monetários devem possuir representação que evite problemas de precisão associados a números de ponto flutuante.
+
+No banco de dados, valores monetários devem utilizar tipo decimal/numeric com precisão definida de acordo com o domínio.
+
+Exemplo conceitual:
 
 ```text
-Relacionamento inexistente
-        ↓
-Criação
-        ↓
-Relacionamento ativo
-        ↓
-Remoção
+price NUMERIC(12,2)
 ```
 
-Por esse motivo, Hard Delete é geralmente preferível.
+A precisão e escala definitivas devem ser definidas de acordo com o caso de uso.
 
-Soft Delete deve ser adotado somente quando houver necessidade explícita de preservar histórico ou recuperar o relacionamento.
+Operações financeiras não devem utilizar `float` ou `double` como fonte de verdade.
 
 ---
 
-## 21. Relacionamentos e Dados Derivados
+# 28. Dados Sensíveis
 
-Entidades de relacionamento frequentemente servem como fonte para indicadores derivados.
+Dados sensíveis ou pessoais devem ser persistidos somente quando houver necessidade legítima para o funcionamento do domínio.
+
+Antes de adicionar um campo que contenha dados pessoais, deve-se avaliar:
+
+- finalidade;
+- necessidade;
+- acesso;
+- retenção;
+- exposição;
+- segurança;
+- possibilidade de minimização.
+
+As regras gerais relacionadas a retenção, anonimização, exclusão e auditoria estão definidas em `CON-008`.
+
+---
+
+# 29. Integridade entre Domínio e Banco
+
+Regras estruturais devem ser reforçadas pelo banco sempre que possível.
 
 Exemplo:
 
 ```text
-CompanyReview
-      ↓
-ReviewService
-      ↓
-Company.rating_average
-Company.rating_count
+Aplicação
+   ↓
+validação de regra
+   ↓
+Database
+   ↓
+UNIQUE / FK / CHECK / NOT NULL
 ```
 
-Outro exemplo:
+A aplicação deve fornecer feedback adequado ao usuário.
 
-```text
-Favorite
-      ↓
-FavoriteService
-      ↓
-Company.favorites_count
-```
-
-Nesses casos:
-
-- a entidade de relacionamento é a fonte da verdade;
-- o indicador armazenado na entidade principal é apenas uma otimização;
-- o indicador deve poder ser recalculado.
+O banco deve atuar como última camada de proteção da integridade estrutural.
 
 ---
 
-## 22. Datas e Horários
+# 30. Regras de Negócio e Persistência
 
-Datas persistidas devem possuir semântica clara.
+O modelo persistente não deve se tornar o local indiscriminado de todas as regras de negócio.
 
-Quando representarem um instante no tempo, devem ser armazenadas em UTC.
-
-Exemplos:
-
-- `created_at`;
-- `updated_at`;
-- `published_at`;
-- `starts_at`;
-- `expires_at`.
-
-Datas relacionadas a regras de calendário local devem ser tratadas de acordo com sua semântica de negócio e não devem ser convertidas automaticamente para UTC quando isso alterar o significado da informação.
-
-A definição detalhada do ciclo de vida de conteúdos, incluindo `starts_at` e `expires_at`, deve permanecer nas convenções específicas do módulo de conteúdo.
-
----
-
-## 23. Referências a Arquivos
-
-Entidades de domínio não devem armazenar o conteúdo binário dos arquivos.
-
-Devem armazenar apenas uma referência.
-
-Exemplo:
-
-```text
-media_id
-```
-
-ou uma chave de armazenamento quando apropriado.
-
-A abstração de armazenamento deve permitir substituir o provedor sem modificar as regras do domínio.
-
----
-
-## 24. Integridade entre Domínio e Banco
-
-A integridade dos dados deve ser protegida em diferentes níveis.
-
-### Aplicação
-
-Responsável por:
-
-- regras de negócio;
-- autorização;
-- validações contextuais;
-- transições de estado.
-
-### Banco de dados
-
-Responsável por:
-
-- integridade referencial;
-- unicidade;
-- nulabilidade;
-- constraints;
-- tipos;
-- integridade estrutural.
-
-Nenhuma das camadas deve ser considerada substituta da outra.
-
----
-
-## 25. Regras de Negócio e Entidades
-
-Entidades e modelos de persistência não devem ser utilizados como local indiscriminado para regras de negócio.
-
-As regras devem permanecer na camada de domínio apropriada.
+Regras devem permanecer na camada de domínio ou aplicação apropriada.
 
 Por exemplo:
 
 ```text
 ReviewService
-    ├── valida permissão
-    ├── verifica duplicidade
+    ├── valida autorização
+    ├── verifica regras de avaliação
     ├── cria avaliação
     └── atualiza indicadores
 ```
 
-Enquanto a persistência permanece responsável por armazenar os dados.
+Enquanto a persistência é responsável por armazenar e proteger a integridade estrutural dos dados.
 
 ---
 
-## 26. Checklist para Novas Entidades
+# 31. Separação entre Modelo de Domínio e Modelo de Persistência
 
-Antes de criar uma nova entidade persistente, deve-se avaliar:
+A representação utilizada pelo banco não precisa ser idêntica à representação conceitual do domínio.
+
+O sistema poderá utilizar modelos específicos de persistência quando isso trouxer benefícios de:
+
+- desempenho;
+- integridade;
+- consultas;
+- compatibilidade com o ORM;
+- evolução da infraestrutura.
+
+Entretanto, a estrutura do banco não deve alterar o significado do conceito de domínio.
+
+Quando houver divergência relevante entre domínio e persistência, essa decisão deve ser documentada quando necessário.
+
+---
+
+# 32. Estratégia para Relacionamentos
+
+Ao criar um relacionamento, deve-se definir explicitamente:
+
+- entidades envolvidas;
+- cardinalidade;
+- obrigatoriedade;
+- Foreign Keys;
+- unicidade;
+- estratégia de exclusão;
+- necessidade de entidade de relacionamento;
+- necessidade de índices.
+
+Exemplo:
+
+```text
+Company
+   │
+   └── CompanyCatalogItem
+          │
+          └── company_id NOT NULL
+```
+
+A estratégia de exclusão deverá ser definida em conjunto com o lifecycle da entidade conforme `CON-008`.
+
+---
+
+# 33. Checklist para Novas Entidades
+
+Antes de criar uma nova entidade persistente, deve-se responder:
+
+### Domínio
 
 - Qual conceito de domínio ela representa?
-- Qual é sua fonte de verdade?
-- Qual é seu ciclo de vida?
+- Por que esse conceito precisa existir como entidade?
+- Qual é sua responsabilidade?
+- Qual contexto de domínio possui essa responsabilidade?
+
+### Identidade
+
+- A entidade possui identidade própria?
+- O identificador será UUID?
+- Existe algum identificador funcional adicional?
+
+### Atributos
+
+- Quais são os atributos obrigatórios?
+- Quais são opcionais?
+- Algum atributo é derivado?
+- Algum atributo contém dado pessoal?
+- Existe algum valor monetário?
+- Existem datas ou horários?
+
+### Relacionamentos
+
+- Quais entidades estão relacionadas?
+- Qual é a cardinalidade?
+- A relação é obrigatória?
+- Precisa de entidade própria?
+- Existe regra de unicidade?
+
+### Integridade
+
+- Quais `NOT NULL` são necessários?
+- Quais `UNIQUE` são necessários?
+- Quais `CHECK` são necessários?
+- Quais Foreign Keys são necessárias?
+- Quais índices são necessários?
+
+### Lifecycle
+
+- A entidade possui estado de negócio?
+- Precisa de arquivamento?
+- Precisa de Soft Delete?
 - Qual é sua estratégia de exclusão?
-- Precisa de UUID?
-- Quais campos de auditoria são necessários?
-- Existem relacionamentos?
-- Algum relacionamento merece entidade própria?
-- Existem regras de unicidade?
-- Quais índices serão necessários?
-- Algum campo é derivado?
-- Existe necessidade de ENUM?
-- O dado possui semântica temporal?
-- Existe necessidade de armazenamento de arquivos?
-- Quais regras pertencem ao domínio?
-- Quais restrições devem ser garantidas pelo banco?
+
+As respostas relacionadas a lifecycle devem seguir `CON-008`.
+
+### Recursos externos
+
+- A entidade referencia arquivos ou outros recursos externos?
+- Existe necessidade de mídia?
+- A integração está desacoplada da infraestrutura?
+
+As regras de mídia devem seguir `CON-007`.
 
 ---
 
-## 27. Convenções Relacionadas
+# 34. Exemplos de Modelagem
+
+## 34.1. Empresa
+
+Conceitualmente:
+
+```text
+Company
+├── id
+├── name
+├── slug
+├── description
+├── status
+├── profile_media_id
+├── cover_media_id
+├── created_at
+└── updated_at
+```
+
+A entidade representa a empresa como conceito central do domínio.
+
+As mídias possuem lifecycle próprio conforme `CON-007`.
+
+---
+
+## 34.2. Item de catálogo
+
+```text
+CompanyCatalogItem
+├── id
+├── company_id
+├── name
+├── description
+├── price
+├── media_id
+├── created_at
+└── updated_at
+```
+
+O item pertence a uma empresa.
+
+A relação:
+
+```text
+Company 1 ─── N CompanyCatalogItem
+```
+
+deve ser obrigatória no lado do item.
+
+---
+
+## 34.3. Favorito
+
+```text
+Favorite
+├── id
+├── user_id
+├── company_id
+└── created_at
+```
+
+A regra:
+
+```text
+UNIQUE (user_id, company_id)
+```
+
+impede duplicidade do mesmo favorito.
+
+`Favorite` possui significado próprio no domínio e, portanto, não deve ser tratado apenas como uma associação técnica.
+
+---
+
+## 34.4. Avaliação
+
+```text
+CompanyReview
+├── id
+├── company_id
+├── user_id
+├── rating
+├── comment
+├── created_at
+└── updated_at
+```
+
+A avaliação representa uma entidade de domínio porque possui:
+
+- identidade;
+- regras;
+- conteúdo próprio;
+- relacionamento com usuário;
+- relacionamento com empresa;
+- potencial necessidade de moderação e auditoria.
+
+---
+
+# 35. Relação com Dados Derivados
+
+Quando uma entidade possuir indicadores derivados, a documentação deve identificar explicitamente sua fonte da verdade.
+
+Exemplo:
+
+```text
+CompanyReview
+      │
+      ├── rating
+      └── ...
+             │
+             ▼
+        fonte da verdade
+             │
+             ▼
+         Company
+         ├── rating_average
+         └── rating_count
+```
+
+Os campos derivados não devem substituir a entidade de origem.
+
+Se houver inconsistência, os valores devem poder ser recalculados.
+
+---
+
+# 36. Relação com Lifecycle
+
+A modelagem deve permitir que uma entidade represente seu estado de negócio sem confundir esse estado com sua existência física.
+
+Exemplo:
+
+```text
+Company
+status = INACTIVE
+```
+
+não significa:
+
+```text
+Company não existe no banco
+```
+
+Da mesma forma:
+
+```text
+Company
+status = ARCHIVED
+```
+
+não significa necessariamente:
+
+```text
+Hard Delete
+```
+
+Estados, arquivamento, exclusão e retenção são conceitos diferentes.
+
+A política geral está definida em:
+
+`CON-008-data-lifecycle-and-audit-standards.md`
+
+---
+
+# 37. Relação com Auditoria
+
+O modelo de uma entidade não deve incorporar mecanismos próprios de auditoria histórica sem necessidade.
+
+Campos como:
+
+```text
+created_at
+updated_at
+```
+
+representam informações operacionais da própria entidade.
+
+O histórico de operações relevantes deve utilizar o mecanismo de auditoria definido em `CON-008`.
+
+Essa separação evita que cada entidade implemente seu próprio modelo de histórico.
+
+---
+
+# 38. Relação com Mídias
+
+Mídias não devem ser tratadas como conteúdo binário dentro das entidades.
+
+Uma entidade deve possuir apenas a referência necessária para utilizar uma mídia.
+
+Exemplo:
+
+```text
+Company
+├── profile_media_id
+└── cover_media_id
+```
+
+O armazenamento físico, upload, substituição e remoção são responsabilidades do Media Module.
+
+As regras completas estão em:
+
+`CON-007-media-architecture-and-lifecycle-standards.md`
+
+---
+
+# 39. Decisões de Modelagem Consolidadas
+
+As seguintes convenções fazem parte do padrão atual do Bairu:
+
+| Decisão                                          | Justificativa                                    |
+| ------------------------------------------------ | ------------------------------------------------ |
+| UUID para entidades persistentes                 | Identidade técnica estável e adequada à evolução |
+| Entidades representam conceitos de domínio       | Evita modelagem orientada somente ao banco       |
+| Tabelas em `snake_case` plural                   | Consistência de persistência                     |
+| Entidades da aplicação no singular               | Clareza semântica                                |
+| Foreign Keys no banco                            | Integridade referencial                          |
+| UNIQUE para regras de unicidade                  | Proteção contra inconsistências e concorrência   |
+| Índices orientados a consultas                   | Evita otimização indiscriminada                  |
+| ENUM para conjuntos pequenos e estáveis          | Simplicidade no MVP                              |
+| Reference tables quando valores forem dinâmicos  | Permite evolução e metadados                     |
+| Dados derivados não são fonte da verdade         | Preserva consistência conceitual                 |
+| Dados derivados devem ser recalculáveis          | Facilita recuperação de inconsistências          |
+| `created_at` e `updated_at` quando aplicáveis    | Rastreabilidade operacional                      |
+| `deleted_at` não é padrão global                 | Lifecycle é definido por entidade                |
+| Lifecycle centralizado em CON-008                | Evita duplicação de regras                       |
+| Mídias referenciadas, não armazenadas no domínio | Desacoplamento da infraestrutura                 |
+| Regras de mídia centralizadas em CON-007         | Evita duplicação entre módulos                   |
+| Integridade dividida entre aplicação e banco     | Defesa em múltiplas camadas                      |
+
+---
+
+# 40. Relação com Outras Convenções
 
 Este documento deve ser utilizado em conjunto com:
 
 - `CON-001-architecture-conventions.md` — princípios e organização arquitetural;
-- `CON-003-rest-api-conventions.md` — contratos HTTP e APIs REST;
-- `CON-004-frontend-conventions.md` — convenções do frontend;
-- `CON-005-git-conventions.md` — versionamento;
-- `CON-006-commit-conventions.md` — mensagens de commit.
+- `CON-003-rest-api-conventions.md` — APIs REST;
+- `CON-004-frontend-conventions.md` — frontend;
+- `CON-005-git-conventions.md` — Git;
+- `CON-006-commit-conventions.md` — commits;
+- `CON-007-media-architecture-and-lifecycle-standards.md` — mídias;
+- `CON-008-data-lifecycle-and-audit-standards.md` — lifecycle, retenção e auditoria;
+- `DB-001-database-architecture.md` — arquitetura do banco de dados.
+
+Quando houver conflito entre documentos, a regra mais específica deve ser considerada em conjunto com os princípios arquiteturais gerais.
+
+Decisões relevantes que alterem a arquitetura devem ser registradas como ADR quando apropriado.
 
 ---
 
-## 28. Manutenção
+# 41. Manutenção
 
-Este documento deve ser atualizado sempre que uma convenção geral de modelagem ou persistência for alterada.
+Este documento deve ser atualizado quando uma convenção geral de modelagem de domínio ou dados for alterada.
 
 Decisões específicas de uma entidade não precisam necessariamente alterar este documento.
 
-Quando uma decisão representar uma mudança arquitetural significativa, deve ser registrada também como ADR.
+Quando uma decisão representar uma mudança arquitetural significativa, deverá ser avaliada a necessidade de criação ou atualização de uma ADR.
+
+As convenções devem refletir o estado real do projeto e não apenas uma arquitetura desejada para o futuro.
+
+O documento deve permanecer focado em **como o Bairu modela seus conceitos e dados**, evitando duplicar regras específicas de:
+
+- arquitetura geral;
+- APIs;
+- frontend;
+- mídias;
+- lifecycle;
+- auditoria;
+- infraestrutura física do banco.

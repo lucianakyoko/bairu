@@ -8,7 +8,7 @@ Seu objetivo é garantir consistência nas decisões técnicas, reduzir ambiguid
 
 Estas convenções devem orientar a criação de novos módulos, funcionalidades e componentes da plataforma.
 
-Detalhes específicos de modelagem de dados, APIs REST, frontend, Git e commits são definidos nos demais documentos da coleção de convenções.
+Detalhes específicos de modelagem de dados, APIs REST, frontend, Git, commits, lifecycle, auditoria e armazenamento de mídias são definidos nos demais documentos da coleção de convenções.
 
 ---
 
@@ -73,7 +73,6 @@ apps/
 ├── web/
 ├── admin/
 └── api/
-└── ...
 
 packages/
 ├── ui/
@@ -129,6 +128,7 @@ apps/api/src/
 ├── reviews/
 ├── reports/
 ├── notifications/
+├── media/
 └── common/
 ```
 
@@ -172,7 +172,7 @@ O domínio da plataforma é organizado conceitualmente em Bounded Contexts.
 | -------------- | --------------------------------------------- |
 | Identity       | Usuários e autenticação                       |
 | Business       | Empresas e informações institucionais         |
-| Discovery      | Categorias e catálogo                         |
+| Catalog        | Categorias e catálogo                         |
 | Content        | Promoções, novidades, vagas, eventos e cupons |
 | Feed           | Distribuição e agregação de conteúdo          |
 | Community      | Favoritos, avaliações e denúncias             |
@@ -320,36 +320,32 @@ A camada de domínio não deve depender desnecessariamente de detalhes específi
 
 A persistência deve permanecer encapsulada por componentes apropriados, permitindo evolução futura da infraestrutura sem espalhar detalhes do banco pela aplicação.
 
-As convenções específicas de modelagem, nomenclatura, identificadores, auditoria e exclusão estão definidas em:
-
-`CON-002-domain-and-data-conventions.md`
+As convenções específicas de modelagem, nomenclatura, identificadores, auditoria, lifecycle e exclusão estão definidas nos documentos correspondentes da coleção de convenções.
 
 ---
 
 ## 10. Armazenamento de Arquivos
 
-Arquivos não devem ser armazenados diretamente no banco de dados.
+Arquivos binários não devem ser armazenados diretamente no banco de dados.
 
-A aplicação deve persistir apenas referências aos arquivos.
+A aplicação deve persistir apenas referências e metadados necessários para relacionar o arquivo ao domínio.
 
-Exemplo:
+O armazenamento físico deve permanecer sob responsabilidade de um provedor externo de mídia.
 
-```text
-catalog/company-uuid/item-uuid/main.webp
-```
+No MVP, o Bairu utiliza o Cloudinary.
 
-O provedor de armazenamento deve ser tratado como uma dependência de infraestrutura.
+A arquitetura deve permitir futura substituição do provedor sem exigir alterações significativas nas entidades de domínio.
 
-O provedor inicial do Bairu é o Cloudinary.
-
-A arquitetura deve permitir futura substituição por serviços como:
+Possíveis provedores futuros incluem:
 
 - AWS S3;
 - Magalu Cloud;
 - MinIO;
 - Google Cloud Storage.
 
-A substituição do provedor não deve exigir alterações significativas nas entidades de domínio.
+A implementação detalhada do armazenamento, upload, associação, substituição, exclusão e tratamento de falhas está definida em:
+
+`CON-009-media-architecture-and-lifecycle-standards.md`
 
 ---
 
@@ -369,6 +365,8 @@ A arquitetura deve observar, entre outros:
 - não exposição de detalhes internos da infraestrutura.
 
 As regras específicas de segurança da API são tratadas no documento de convenções da API REST.
+
+Regras relacionadas à proteção de dados pessoais, retenção e auditoria devem ser tratadas nas convenções específicas de lifecycle e compliance.
 
 ---
 
@@ -426,13 +424,15 @@ Antes de implementar uma nova funcionalidade relevante, deve-se avaliar:
 5. Existe impacto em outros módulos?
 6. A comunicação entre módulos precisa ser síncrona?
 7. Existe necessidade real de evento de domínio?
-8. Qual é a estratégia de persistência e exclusão?
+8. Qual é a estratégia de persistência e lifecycle?
 9. Existem impactos de performance?
 10. Existem impactos de segurança?
 11. É necessário atualizar alguma convenção ou documentação?
 12. A funcionalidade possui impacto sobre limites ou planos da plataforma?
 
-Essa análise não deve ser burocrática para pequenas alterações. Seu objetivo é orientar decisões arquiteturais relevantes.
+Essa análise não deve ser burocrática para pequenas alterações.
+
+Seu objetivo é orientar decisões arquiteturais relevantes.
 
 ---
 
@@ -464,6 +464,7 @@ As seguintes decisões fazem parte da arquitetura atual do Bairu:
 | Bounded Contexts                                   | Definição clara dos limites conceituais do domínio              |
 | Feed desacoplado do conteúdo                       | Permite evolução independente dos tipos de conteúdo             |
 | Storage externo                                    | Mantém o banco independente do provedor de arquivos             |
+| Media como capacidade transversal                  | Centraliza upload e lifecycle de arquivos                       |
 | UUID                                               | Identificadores adequados para distribuição e exposição pública |
 | Evolução incremental                               | Evita complexidade desnecessária no MVP                         |
 
@@ -475,11 +476,14 @@ Este documento estabelece princípios arquiteturais gerais.
 
 As regras específicas devem ser consultadas nos documentos correspondentes:
 
-- `CON-002-domain-and-data-conventions.md` — domínio, entidades e dados;
+- `CON-002-domain-and-data-modeling-conventions.md` — domínio, entidades e dados;
 - `CON-003-rest-api-conventions.md` — APIs REST;
 - `CON-004-frontend-conventions.md` — frontend;
 - `CON-005-git-conventions.md` — Git e fluxo de desenvolvimento;
-- `CON-006-commit-conventions.md` — mensagens de commit.
+- `CON-006-commit-conventions.md` — mensagens de commit;
+- `CON-007-audit-and-compliance-standards.md` — auditoria e compliance;
+- `CON-008-data-lifecycle-standards.md` — ciclo de vida e retenção de dados;
+- `CON-009-media-architecture-and-lifecycle-standards.md` — arquitetura e ciclo de vida das mídias.
 
 Quando houver conflito entre documentos, a decisão mais específica deve ser avaliada em conjunto com a arquitetura geral e, quando necessário, registrada como ADR.
 
