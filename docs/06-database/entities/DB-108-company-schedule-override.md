@@ -29,9 +29,10 @@ A exceção prevalece sobre a programação regular da empresa para a data corre
 | `created_at`  | TIMESTAMPTZ |         Sim | Data de criação do registro                |
 | `updated_at`  | TIMESTAMPTZ |         Sim | Data da última alteração                   |
 
-Quando `is_closed = true`, a empresa não possui horário de funcionamento nessa data.
-
-Quando `is_closed = false`, a exceção representa funcionamento diferente da agenda regular e deverá estar associada aos horários excepcionais definidos para a data.
+- Quando `is_closed = true`, a empresa não possui horário de funcionamento nessa data.
+- Quando `is_closed = true`, a exceção não deve possuir períodos excepcionais.
+- Quando `is_closed = false`, a exceção deve possuir pelo menos um período excepcional.
+- Quando `is_closed = false`, a exceção representa funcionamento diferente da agenda regular e deverá estar associada aos horários excepcionais definidos para a data.
 
 ---
 
@@ -41,6 +42,8 @@ Quando `is_closed = false`, a exceção representa funcionamento diferente da ag
 Company
    │
    └── CompanyScheduleOverride
+             │
+             └──< CompanyScheduleOverridePeriod
 ```
 
 - Uma `Company` pode possuir várias exceções.
@@ -51,6 +54,12 @@ Relacionamento:
 ```text
 Company 1 ─── N CompanyScheduleOverride
 ```
+
+### CompanyScheduleOverridePeriod
+
+Uma `CompanyScheduleOverride` pode possuir um ou mais períodos excepcionais quando `is_closed = false`.
+
+Os períodos representam os horários específicos daquela data e não fazem parte da agenda regular da empresa.
 
 ---
 
@@ -92,13 +101,18 @@ Isso garante que exista uma única definição de exceção para cada empresa e 
 
 ## 5. Índices
 
-A combinação de empresa e data é o principal padrão de consulta.
+A constraint:
 
 ```text
-idx_company_schedule_overrides_company_id_date
+UNIQUE (company_id, date)
 ```
 
-O índice também atende à consulta de exceção de uma empresa para uma data específica.
+já cria um índice adequado para:
+
+localizar a exceção de uma empresa em determinada data;
+garantir que exista no máximo uma exceção por empresa e data.
+
+Não é necessário um índice adicional por company_id ou (company_id, date) no MVP.
 
 ---
 
@@ -108,12 +122,25 @@ O índice também atende à consulta de exceção de uma empresa para uma data e
 
 A exceção representa uma configuração específica da agenda e não possui, no MVP, necessidade de histórico próprio.
 
-Quando a empresa for removida, suas exceções podem ser removidas em cascata.
+Quando uma `Company` for removida, suas `CompanyScheduleOverride` deverão ser removidas em cascata.
+
+Quando uma `CompanyScheduleOverride` for removida, seus períodos excepcionais também deverão ser removidos em cascata.
+
+A cadeia de exclusão será:
 
 ```text
 Company
-   └── CompanyScheduleOverride
+   │
+   └── CASCADE
+        ↓
+CompanyScheduleOverride
+   │
+   └── CASCADE
+        ↓
+CompanyScheduleOverridePeriod
 ```
+
+A entidade utiliza Hard Delete.
 
 ---
 

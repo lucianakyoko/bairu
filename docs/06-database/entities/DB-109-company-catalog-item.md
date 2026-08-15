@@ -47,6 +47,10 @@ Essas funcionalidades não fazem parte do MVP.
 
 Os limites de quantidade e tamanho dos campos textuais devem ser definidos pela aplicação de acordo com as necessidades da interface.
 
+`price` deve utilizar um tipo decimal apropriado para valores monetários, evitando tipos de ponto flutuante.
+
+A precisão e escala definitivas devem seguir a convenção financeira adotada pelo banco.
+
 ---
 
 ## 4. Relacionamentos
@@ -185,9 +189,11 @@ O item representa uma informação de apresentação pertencente à empresa e n�
 
 Quando uma empresa for removida, seus itens de catálogo poderão ser removidos em cascata.
 
-A mídia associada deve seguir o lifecycle definido pelo Media Module.
+A referência opcional à `Media` deve ser removida quando o `CompanyCatalogItem` for excluído, sem excluir automaticamente a entidade `Media`.
 
-A exclusão do item não deve deixar referências inválidas no banco ou arquivos sem finalidade no storage.
+O lifecycle e a eventual remoção física da mídia devem seguir as regras definidas pelo Media Module.
+
+A exclusão do item não deve deixar referências inválidas no banco.
 
 ---
 

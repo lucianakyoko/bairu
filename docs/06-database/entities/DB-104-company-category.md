@@ -138,7 +138,7 @@ A integridade referencial deve ser garantida pelo banco de dados.
 
 A constraint de unicidade em:
 
-```text
+```
 (company_id, category_id)
 ```
 
@@ -146,13 +146,21 @@ também fornece suporte para consultas que utilizem essa combinação.
 
 Índices adicionais devem ser avaliados conforme os padrões reais de consulta.
 
-Caso a busca de empresas por categoria seja frequente, deve existir suporte eficiente para:
+A constraint de unicidade em:
 
-```text
-category_id → companies
-```
+`(company_id, category_id)`
 
-O índice necessário deve ser definido durante a implementação da migration e validado conforme as consultas da aplicação.
+também fornece suporte para consultas que utilizem essa combinação.
+
+Deve existir um índice adicional em:
+
+`(category_id, company_id)`
+
+para permitir consultas eficientes de empresas associadas a uma
+determinada categoria.
+
+Esse índice também poderá ser utilizado para recuperar as
+associações de uma categoria de forma ordenada por empresa.
 
 ---
 
@@ -167,7 +175,17 @@ A remoção da associação não implica exclusão de:
 
 A exclusão de uma `Company` ou `Category` deverá considerar a integridade de seus relacionamentos.
 
-Quando a associação perder seu significado devido à exclusão da entidade principal, `CASCADE DELETE` poderá ser utilizado conforme definido na migration.
+Quando uma `Company` for excluída, suas associações em
+`CompanyCategory` deverão ser removidas automaticamente.
+
+Quando uma `Category` for excluída, suas associações em
+`CompanyCategory` deverão ser removidas automaticamente.
+
+Portanto, as Foreign Keys de `company_id` e `category_id`
+utilizarão comportamento equivalente a `ON DELETE CASCADE`.
+
+A exclusão de `CompanyCategory` não implica exclusão de
+`Company` ou `Category`.
 
 Soft Delete não é necessário.
 

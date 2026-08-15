@@ -2,9 +2,11 @@
 
 ## 1. Objetivo
 
-`CompanyExternalLink` representa um link de uma empresa para uma plataforma ou rede social externa.
+`CompanyExternalLink` representa um link externo associado a uma empresa.
 
-A entidade permite que empresas e profissionais disponibilizem seus canais digitais para serem encontrados pela comunidade dentro do Bairu.
+A entidade permite que empresas e profissionais disponibilizem seus canais
+digitais, páginas institucionais, websites, blogs e perfis em plataformas
+externas para serem encontrados pela comunidade dentro do Bairu.
 
 ---
 
@@ -91,7 +93,8 @@ O relacionamento com `Company` é obrigatório.
 
 ### Unique
 
-Uma empresa não deve possuir mais de um link para a mesma plataforma:
+Uma empresa não deve possuir mais de um link para a mesma plataforma
+no MVP:
 
 ```text
 UNIQUE (company_id, platform)
@@ -136,7 +139,10 @@ A constraint de unicidade em `(company_id, platform)` também deverá possuir o 
 
 O link representa uma associação simples entre uma empresa e uma plataforma externa e não possui necessidade de preservação histórica no MVP.
 
-Quando uma empresa for removida, o relacionamento poderá ser removido em cascata conforme a estratégia definida para `Company`.
+Quando uma `Company` for removida, seus `CompanyExternalLink`
+associados deverão ser removidos automaticamente.
+A Foreign Key `company_id` utilizará comportamento equivalente a
+`ON DELETE CASCADE`.
 
 A exclusão do link não afeta a conta ou o perfil existente na plataforma externa.
 

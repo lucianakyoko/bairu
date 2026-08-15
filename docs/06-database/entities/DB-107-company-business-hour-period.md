@@ -44,6 +44,7 @@ A estrutura deve conter, no mínimo, os dados necessários para:
 | `ends_at`                 | Fim do período                             |
 | `observation`             | Observação opcional relacionada ao período |
 | `created_at`              | Momento de criação                         |
+| `updated_at`              | Momento da última alteração                |
 
 > Os nomes dos campos de horário devem ser mantidos consistentes com a convenção adotada para o restante do modelo. `starts_at` e `ends_at` para representar os limites temporais de um período, independentemente de serem instantes ou horários recorrentes.
 
@@ -88,6 +89,8 @@ Devem ser consideradas as seguintes restrições:
 - `starts_at` deve representar um horário anterior a `ends_at`;
 - `observation` é opcional;
 - a Foreign Key deve garantir a existência do `CompanyBusinessDay`.
+- `created_at` deve ser `TIMESTAMPTZ NOT NULL`;
+- `updated_at` deve ser `TIMESTAMPTZ NOT NULL`;
 
 A regra de horário inválido deve ser protegida pelo banco quando puder ser representada por constraint e também validada na aplicação.
 
@@ -136,10 +139,17 @@ As seguintes regras devem ser respeitadas:
 1. Um período pertence a apenas um `CompanyBusinessDay`.
 2. Um dia pode possuir múltiplos períodos.
 3. O início deve ocorrer antes do término.
-4. Períodos não devem representar exceções de calendário.
-5. Alterações excepcionais de funcionamento devem ser representadas por `CompanyScheduleOverride`.
-6. A entidade não deve conhecer regras específicas de apresentação ou publicação do negócio.
-7. `starts_at` e `ends_at` representam horários locais recorrentes associados ao dia de funcionamento. Não representam instantes absolutos e, portanto, não devem ser armazenados como timestamps UTC.
+4. Períodos de um mesmo `CompanyBusinessDay` não podem se sobrepor.
+5. Períodos que apenas compartilham o mesmo limite de horário podem coexistir.
+6. A validação de sobreposição deve ser realizada na camada de aplicação no MVP.
+7. Períodos não devem representar exceções de calendário.
+8. Alterações excepcionais de funcionamento devem ser representadas por `CompanyScheduleOverride`.
+9. A entidade não deve conhecer regras específicas de apresentação ou publicação do negócio.
+10. `starts_at` e `ends_at` representam horários locais recorrentes associados ao dia de funcionamento. Não representam instantes absolutos e, portanto, não devem ser armazenados como timestamps UTC.
+11. `observation` é apenas informativa e não altera a interpretação do período.
+12. Informações que alterem efetivamente o funcionamento do negócio devem
+    ser representadas por regras ou entidades apropriadas, especialmente
+    `CompanyScheduleOverride`.
 
 ---
 

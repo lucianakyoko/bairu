@@ -51,6 +51,11 @@ News
    └── FeedPublication (quando publicada no Feed)
 ```
 
+A associação com `FeedPublication` é realizada através do mecanismo polimórfico
+`content_type` + `content_id` definido pelo contexto `Feed`.
+
+Não existe Foreign Key ou relation Prisma direta entre `News` e `FeedPublication`.
+
 ### Company
 
 Uma notícia pertence a uma única empresa.
@@ -76,11 +81,15 @@ O Feed não deve armazenar ou reproduzir as regras próprias de `News`.
 - Uma notícia deve pertencer a uma empresa.
 - Apenas usuários autorizados pela empresa podem criar ou alterar suas notícias.
 - Notícias em `DRAFT` não devem aparecer publicamente.
-- Notícias `PUBLISHED` podem ser distribuídas pelo Feed.
+- Notícias `PUBLISHED` podem ser disponibilizadas publicamente e, quando elegíveis, distribuídas pelo Feed.
+- A disponibilidade pública também deve respeitar `starts_at` e `expires_at`, quando definidos.
 - Notícias arquivadas não devem aparecer nas experiências públicas.
 - `starts_at`, quando informado, define quando a notícia poderá ser disponibilizada.
+- `starts_at`, quando informado, define quando a notícia poderá ser disponibilizada.
 - `expires_at`, quando informado, define o término de sua disponibilidade.
-- `expires_at` deve ser posterior a `starts_at`, quando ambos estiverem definidos.
+- Quando ambos estiverem definidos, `expires_at` deve ser posterior a `starts_at`.
+- Quando `starts_at` não estiver definido, a notícia poderá ser disponibilizada imediatamente após sua publicação, respeitando seu `status`.
+- Quando `expires_at` não estiver definido, a notícia não possui uma data de expiração programada.
 - A notícia pode possuir no máximo uma mídia no MVP.
 - O limite de notícias por empresa pertence à regra comercial do Content Module e não à estrutura da entidade.
 
@@ -113,20 +122,24 @@ A regra deve ser aplicada no banco sempre que puder ser representada de forma co
 
 A estratégia de exclusão deve respeitar o lifecycle definido para conteúdos.
 
-A remoção de uma `Company` deve considerar suas notícias e respectivas mídias conforme as regras de lifecycle e retenção da plataforma.
+A remoção de uma `Company` deve considerar suas `News` conforme as regras de lifecycle e retenção da plataforma.
+
+A remoção de uma `News` deve considerar sua referência à `Media`, respeitando o lifecycle definido pelo Media Module.
+
+A estratégia de exclusão da `Media` não deve ser definida exclusivamente por esta entidade.
 
 ---
 
 ## 6. Índices
 
-Índices recomendados:
+Índice principal: `idx_news_company_id`
 
-```text
-idx_news_company_id
-idx_news_status
-idx_news_starts_at
-idx_news_expires_at
-```
+Índices adicionais envolvendo `status`, `starts_at` e `expires_at`
+devem ser adicionados somente quando houver consultas identificadas que
+justifiquem sua criação.
+
+O desenho definitivo dos índices deverá ser validado durante a implementação
+das consultas do Content e do Feed.
 
 Índices compostos poderão ser adicionados posteriormente conforme os padrões reais de consulta.
 

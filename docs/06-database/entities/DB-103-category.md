@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-Definir a estrutura e as regras específicas da entidade `Category` no banco de dados do Bairu.
+Definir a estrutura e as regras específicas da entidade `Catalog` no banco de dados do Bairu.
 
 A entidade pertence ao Bounded Context **Discovery** e representa uma categoria utilizada para organizar e facilitar a descoberta de negócios, produtos e serviços na plataforma.
 
@@ -242,7 +242,10 @@ Company
    └── CompanyCategory ── Category
 ```
 
-A associação será representada pela entidade `CompanyCategory`.
+A relação não será representada por uma Foreign Key diretamente em
+Category ou Company.
+
+A associação será persistida exclusivamente através de CompanyCategory.
 
 `Category` não deve armazenar uma lista de empresas em um campo próprio.
 
@@ -343,12 +346,15 @@ Para o MVP, a abordagem mais simples é manter o `slug` globalmente único.
 Devem ser considerados índices para:
 
 - `parent_id`;
-- `status`;
-- `slug`.
+- `slug`
 
 O índice de `slug` deve ser garantido pela constraint de unicidade.
 
 O índice de `parent_id` é importante para consultas de categorias filhas e construção da árvore.
+
+Um índice adicional em `status` não é obrigatório no MVP e deverá
+ser adicionado caso os padrões reais de consulta justifiquem sua
+utilização.
 
 Índices adicionais devem ser definidos conforme os padrões reais de consulta.
 
@@ -390,6 +396,17 @@ Antes de realizar Hard Delete, devem ser avaliados:
 Quando a categoria possuir dependências que não possam ser removidas ou transferidas com segurança, a exclusão deve ser bloqueada.
 
 Uma alternativa futura poderá ser arquivar ou inativar a categoria em vez de removê-la.
+
+### Hierarquia
+
+Uma categoria que possua categorias filhas não pode ser removida
+automaticamente.
+
+A relação entre categoria pai e categorias filhas deve utilizar
+comportamento equivalente a RESTRICT.
+
+A remoção de uma categoria pai somente poderá ocorrer após suas
+dependências hierárquicas terem sido tratadas explicitamente.
 
 ---
 

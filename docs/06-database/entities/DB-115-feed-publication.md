@@ -30,11 +30,11 @@ As regras e os dados específicos do conteúdo permanecem sob responsabilidade d
 
 No MVP, os seguintes tipos de conteúdo podem gerar uma `FeedPublication`:
 
-- `CompanyPromotion`;
-- `CompanyNews`;
-- `CompanyCoupon`;
-- `CompanyJob`;
-- `CompanyEvent`.
+- `Promotion`;
+- `News`;
+- `Coupon`;
+- `JobVacancy`;
+- `Event`.
 
 `CompanyCatalogItem` não gera `FeedPublication` no MVP.
 
@@ -75,7 +75,7 @@ PROMOTION
 NEWS
 COUPON
 EVENT
-JOB
+JOB_VACANCY
 ```
 
 Novos tipos poderão ser adicionados conforme novos conteúdos forem incorporados à plataforma.
@@ -91,7 +91,7 @@ PROMOTION
 NEWS
 COUPON
 EVENT
-JOB
+JOB_VACANCY
 }
 
 ### 5.2. FeedPublicationStatus
@@ -100,7 +100,6 @@ JOB
 enum FeedPublicationStatus {
   ACTIVE
   ARCHIVED
-  EXPIRED
 }
 ```
 
@@ -122,7 +121,9 @@ company_id deve possuir uma Foreign Key para Company.id.
 
 A empresa associada à publicação deve ser a mesma empresa responsável pelo conteúdo de origem.
 
-A consistência entre company_id e a empresa proprietária do conteúdo deve ser validada pela camada de domínio.
+Essa consistência não pode ser garantida integralmente por Foreign Key devido à natureza polimórfica da referência ao conteúdo.
+
+A validação deve ocorrer na camada de domínio antes da criação ou alteração da `FeedPublication`.
 
 ---
 
@@ -159,6 +160,12 @@ A integridade dessa referência deve ser garantida pela camada de aplicação.
 
 A resolução deve ocorrer exclusivamente no backend.
 
+`content_id` não possui Foreign Key física no banco.
+
+A ausência da Foreign Key é intencional porque `content_id` pode referenciar diferentes entidades conforme `content_type`.
+
+A integridade da referência polimórfica é responsabilidade do domínio e da camada de aplicação.
+
 ---
 
 ## 8. Fonte da Verdade
@@ -167,11 +174,11 @@ FeedPublication não é a fonte da verdade do conteúdo publicado.
 A fonte da verdade permanece na entidade de origem:
 
 ```
-CompanyPromotion
-CompanyNews
-CompanyCoupon
-CompanyJob
-CompanyEvent
+Promotion
+News
+Coupon
+JobVacancy
+Event
 ```
 
 FeedPublication representa somente a distribuição desse conteúdo no Feed.
@@ -274,7 +281,7 @@ A exclusão da publicação não deve apagar o conteúdo de origem.
 Exemplo:
 
 ```
-CompanyNews
+News
      ↓
 FeedPublication
 ```
@@ -282,6 +289,10 @@ FeedPublication
 A remoção da FeedPublication remove sua distribuição no Feed, mas não remove o conteúdo.
 
 Quando o conteúdo de origem for excluído, a publicação correspondente também deverá ser tratada conforme o fluxo de exclusão definido pelo domínio.
+
+Como a relação com o conteúdo é polimórfica, a exclusão do conteúdo de origem não será propagada por Foreign Key.
+
+A aplicação deverá remover ou arquivar a `FeedPublication` correspondente conforme as regras do domínio.
 
 ---
 
@@ -302,6 +313,10 @@ Hard Delete
 Caso a operação esteja sujeita à auditoria, o fato da exclusão poderá ser registrado conforme as convenções gerais de auditoria da plataforma.
 
 O lifecycle e a retenção de registros de auditoria não fazem parte da responsabilidade desta entidade.
+
+`ARCHIVED` representa uma publicação que deixou de participar do fluxo operacional do Feed, mas que ainda permanece persistida temporariamente.
+
+A permanência do registro não implica retenção histórica indefinida.
 
 ---
 
@@ -335,6 +350,14 @@ Essa constraint impede que o mesmo conteúdo possua múltiplas FeedPublication.
 
 A integridade entre content_type e content_id, por outro lado, permanece responsabilidade da camada de domínio.
 
+### Consistência temporal
+
+Quando `expires_at` estiver definido:
+
+```text
+expires_at > published_at
+```
+
 ---
 
 ## 15. Índices
@@ -342,20 +365,23 @@ A integridade entre content_type e content_id, por outro lado, permanece respons
 Índices previstos:
 `idx_feed_publications_company_id`
 
-para consultas por empresa.
+Utilizado para consultas e recuperação de publicações associadas a uma empresa.
 `idx_feed_publications_published_at`
 
-para ordenação cronológica do Feed.
+Utilizado para ordenação cronológica e consultas por data de publicação.
 `idx_feed_publications_status`
 
-para filtragem por estado da publicação.
+Utilizado para filtragem por estado da publicação.
 `idx_feed_publications_content_type`
 
-para filtragem por tipo de conteúdo.
+Utilizado para filtragem por tipo de conteúdo.
 `idx_feed_publications_expires_at`
 
-para identificação de publicações expiradas.
-A combinação: `(content_type, content_id)` deve possuir índice único para garantir a regra de unicidade.
+Utilizado para consultas relacionadas à expiração das publicações.
+A combinação: `(content_type, content_id)` deve possuir constraint `UNIQUE`, garantindo que uma mesma entidade de conteúdo não possua mais de uma `FeedPublication`.
+Essa constraint também cria automaticamente um índice compatível com a busca pela combinação `(content_type, content_id)`.
+
+Não deve ser criado um índice adicional separado para `(content_type, content_id)` sem uma necessidade de consulta identificada.
 
 O desenho definitivo dos índices deverá ser validado conforme as consultas reais implementadas pelo Feed.
 
@@ -374,13 +400,10 @@ O lifecycle da FeedPublication é:
                   │   ACTIVE    │
                   └──────┬──────┘
                          │
-                ┌────────┴────────┐
-                ↓                 ↓
-          ┌───────────┐     ┌───────────┐
-          │  EXPIRED  │     │  ARCHIVED │
-          └─────┬─────┘     └─────┬─────┘
-                │                 │
-                └────────┬────────┘
+                         ↓
+                  ┌─────────────┐
+                  │   ARCHIVED  │
+                  └──────┬──────┘
                          ↓
                     Hard Delete
 ```

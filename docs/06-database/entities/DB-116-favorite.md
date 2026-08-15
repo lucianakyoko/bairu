@@ -56,7 +56,9 @@ Um usuário pode favoritar várias empresas.
 
 Uma empresa pode ser favoritada por vários usuários.
 
-Cada `Favorite` pertence a exatamente um usuário e uma empresa.
+Cada `Favorite` pertence obrigatoriamente a exatamente um usuário e a uma empresa.
+
+`Favorite` não possui significado independente de `User` e `Company`.
 
 ---
 
@@ -153,33 +155,46 @@ Company.id
 
 sempre apontem para registros existentes.
 
-A estratégia de exclusão dos registros relacionados deve seguir as regras gerais de lifecycle e exclusão da plataforma.
+Como `Favorite` representa uma relação dependente entre `User` e `Company`, a remoção do usuário ou da empresa deve remover os respectivos registros de `Favorite`.
+
+As Foreign Keys devem utilizar `ON DELETE CASCADE`.
+
+A exclusão de um `Favorite` não deve afetar o `User` nem a `Company`.
+
+A relação fica:
+
+```
+ User
+ │
+ └── CASCADE → Favorite ← CASCADE ── Company
+```
+
+Essa é uma situação em que CASCADE é semanticamente adequado: o `Favorite` não possui significado próprio depois que um dos objetos relacionados deixa de existir.
 
 ---
 
 ## 10. Índices
 
-A constraint única:
+A constraint: `UNIQUE (user_id, company_id)` deve ser utilizada para garantir a unicidade da relação e também fornece suporte às consultas que utilizem `user_id` como primeiro critério.
 
-```text
-UNIQUE (user_id, company_id)
-```
+Portanto, não é necessário um índice adicional isolado para: `user_id`
 
-já fornece suporte para consultas que utilizem a combinação dos dois campos.
+Deve existir um índice separado para: `company_id`
 
-Também deve ser considerado um índice para:
-
-```text
-company_id
-```
-
-para consultas como:
+Esse índice suporta consultas como:
 
 - quantidade de favoritos de uma empresa;
-- verificação de usuários que favoritaram uma empresa;
-- cálculo de indicadores derivados.
+- usuários que favoritaram uma empresa;
+- cálculo de indicadores derivados relacionados à empresa.
 
-Um índice separado para `user_id` poderá ser necessário para consultas frequentes da lista de favoritos de um usuário, caso não seja atendido adequadamente pela estratégia de índices adotada no banco.
+Estrutura esperada:
+
+```
+UNIQUE (user_id, company_id)
+INDEX (company_id)
+```
+
+Não devem ser adicionados índices adicionais sem necessidade de consulta identificada.
 
 ---
 
@@ -237,6 +252,7 @@ O banco deve garantir que somente uma das operações consiga criar o relacionam
 | Relação entre `User` e `Company`  | Permite que usuários mantenham empresas de interesse               |
 | `user_id + company_id` é único    | Impede favoritos duplicados                                        |
 | Hard Delete                       | Remover favorito significa remover o relacionamento                |
+| Cascade nas relações dependentes  | Favorite não possui significado independente de User ou Company    |
 | Sem `updated_at`                  | O relacionamento não possui atributos alteráveis no MVP            |
 | Sem `deleted_at`                  | Não há necessidade de Soft Delete                                  |
 | `Favorite` é fonte da verdade     | Permite derivar `favorites_count` quando necessário                |

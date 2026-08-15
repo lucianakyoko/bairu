@@ -46,7 +46,40 @@ Campos previstos para a entidade:
 | `created_at`      | TIMESTAMPTZ |         Sim | Momento de criação                              |
 | `updated_at`      | TIMESTAMPTZ |         Sim | Momento da última alteração                     |
 
-Os valores definitivos dos ENUMs devem ser definidos conforme as regras do domínio e mantidos consistentes com as convenções gerais de modelagem.
+### ENUM `JobEmploymentType`
+
+Valores previstos no MVP:
+
+```text
+FULL_TIME
+PART_TIME
+TEMPORARY
+INTERNSHIP
+APPRENTICESHIP
+CONTRACTOR
+OTHER
+```
+
+### ENUM JobVacancyStatus
+
+Valores previstos no MVP:
+
+```
+DRAFT
+PUBLISHED
+CLOSED
+```
+
+`EXPIRED` não será persistido como status próprio.
+
+A expiração é determinada por `expires_at`, quando informado.
+
+A aplicação deve considerar uma vaga como indisponível para novas oportunidades públicas quando:
+
+- `status` = CLOSED; ou
+- `expires_at` estiver definido e já tiver sido atingido.
+
+O status representa uma decisão de lifecycle, enquanto a expiração representa uma condição temporal.
 
 ---
 
@@ -83,25 +116,23 @@ A distribuição da vaga não altera as regras próprias de lifecycle da entidad
 
 ## 5. Lifecycle
 
-A vaga possui lifecycle próprio de conteúdo.
-
-Conceitualmente:
+O lifecycle persistido da vaga utiliza os estados:
 
 ```text
-Draft / Created
-      ↓
-Published
-      ↓
-Active
-      ↓
-Expired / Closed
+DRAFT
+  ↓
+PUBLISHED
+  ↓
+CLOSED
 ```
 
-A implementação dos estados deve refletir as necessidades reais do MVP e não deve introduzir estados sem comportamento associado.
+A condição `Active` não será armazenada como status separado.
 
-`expires_at` representa o momento a partir do qual a oportunidade deixa de estar disponível para o fluxo público, quando utilizado.
+Uma vaga em `PUBLISHED` pode ser considerada disponível enquanto não estiver fechada e, quando `expires_at` estiver definido, enquanto o prazo não tiver expirado.
 
-Uma vaga expirada permanece armazenada enquanto houver necessidade de histórico, auditoria ou retenção.
+A expiração é uma condição temporal derivada de `expires_at` e não um estado persistido.
+
+A vaga expirada permanece armazenada enquanto houver necessidade de histórico, auditoria ou retenção.
 
 A expiração não representa automaticamente Hard Delete.
 

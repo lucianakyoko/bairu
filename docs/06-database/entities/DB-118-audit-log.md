@@ -99,9 +99,11 @@ PERMISSION_CHANGE
 PRIVACY_ACTION
 ```
 
-Novas ações poderão ser adicionadas conforme surgirem necessidades reais de auditoria.
+Esses valores devem ser representados como um enum controlado pelo banco.
 
-Não é necessário criar uma ação específica para cada entidade.
+Novas ações somente devem ser adicionadas quando existir uma necessidade concreta de auditoria.
+
+Não deve ser criada uma ação específica para cada entidade.
 
 ---
 
@@ -233,27 +235,35 @@ A retenção deve considerar requisitos legais, operacionais, de segurança e de
 
 ## 12. Índices
 
-Devem ser considerados índices para consultas de auditoria:
+Devem ser criados índices para os principais padrões de consulta de auditoria:
 
 ```text
 idx_audit_logs_entity
+```
+
+para consultas por:
+
+```
+(entity_type, entity_id)
 idx_audit_logs_actor_user_id
+```
+
+para consultas por usuário responsável pela operação.
+
+```
 idx_audit_logs_created_at
 ```
 
-O índice de entidade deverá considerar:
-
-```text
-(entity_type, entity_id)
-```
-
+para consultas e ordenação por período.
 Esses índices permitem consultas como:
 
-- histórico de operações de uma entidade;
-- ações realizadas por determinado usuário;
-- eventos ocorridos em determinado período.
+histórico de operações de uma entidade;
+ações realizadas por determinado usuário;
+eventos ocorridos em determinado período.
 
-Índices adicionais deverão ser introduzidos conforme as consultas reais da aplicação administrativa.
+Não deve ser criado índice único para `entity_type` + `entity_id`, pois uma mesma entidade pode possuir múltiplos eventos de auditoria.
+
+Índices adicionais deverão ser introduzidos somente conforme os padrões reais de consulta da aplicação administrativa.
 
 ---
 
@@ -262,6 +272,7 @@ Esses índices permitem consultas como:
 Devem ser aplicadas:
 
 - `PRIMARY KEY` em `id`;
+- `FOREIGN KEY` em `actor_user_id`, quando informado;
 - `NOT NULL` em `action`;
 - `NOT NULL` em `entity_type`;
 - `NOT NULL` em `entity_id`;
@@ -269,6 +280,14 @@ Devem ser aplicadas:
 - valores válidos para `action`.
 
 `actor_user_id` permanece nullable.
+
+A Foreign Key de `actor_user_id` deve utilizar comportamento equivalente a:
+
+```
+ON DELETE SET NULL
+```
+
+A entidade auditada (`entity_type` + `entity_id`) não possui Foreign Key direta, pois a referência é polimórfica.
 
 Não deve existir `UNIQUE` entre `entity_type` e `entity_id`, pois uma mesma entidade pode possuir diversos eventos de auditoria.
 
@@ -286,11 +305,24 @@ User
 AuditLog
 ```
 
-A exclusão de um usuário não deve automaticamente remover seus registros de auditoria.
+A relação com `User` deve utilizar uma Foreign Key opcional.
 
-Quando necessário, a referência ao usuário poderá ser preservada ou tratada conforme a política de retenção e privacidade.
+`actor_user_id` é nullable porque operações automáticas podem não possuir um usuário responsável.
 
-A estratégia definitiva deverá considerar os requisitos aplicáveis no momento da implementação.
+Quando o usuário responsável for removido, a referência em `actor_user_id` deve ser definida como `NULL`, preservando o registro de auditoria sem manter uma referência inválida ao usuário removido.
+
+A exclusão de um `User` nunca deve remover automaticamente seus `AuditLog`.
+
+```text
+User
+  │
+  │ 1:N
+  ▼
+AuditLog
+```
+
+A relação deve utilizar comportamento equivalente a: `ON DELETE SET NULL`
+Isso permite preservar a existência do evento de auditoria sem transformar o AuditLog em dependência de lifecycle do usuário.
 
 ---
 

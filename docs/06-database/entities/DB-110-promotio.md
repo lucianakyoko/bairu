@@ -75,6 +75,9 @@ Promotion
 ```
 
 No MVP, a promoção utiliza no máximo uma imagem.
+A relação com Media é opcional e representa apenas uma referência ao recurso visual.
+
+A exclusão ou alteração da mídia deve seguir o lifecycle definido pelo Media Module e não deve implicar automaticamente a exclusão da Promotion.
 
 O lifecycle da mídia segue:
 
@@ -122,7 +125,9 @@ media_id   → media.id
 - `media_id`, quando informado, deve referenciar uma mídia válida;
 - uma promoção não deve possuir mais de uma mídia no MVP.
 
-A regra de período inválido deve ser validada na aplicação e, quando aplicável, protegida também por constraint do banco.
+A regra `starts_at < expires_at` deve ser validada na aplicação.
+
+Quando suportado pela estratégia de migration e pelo banco, essa invariável poderá também ser protegida por uma CHECK constraint.
 
 ---
 
@@ -187,7 +192,9 @@ A promoção poderá permanecer disponível por até:
 
 **7 dias.**
 
-Esses limites representam regras de produto e não devem ser utilizados como constraints estruturais que impeçam futuras mudanças de plano ou configuração.
+Esses limites representam regras de produto e não devem ser modelados como constraints estruturais permanentes do banco.
+
+A aplicação deve validar os limites vigentes no momento da criação ou alteração da promoção.
 
 A aplicação deve ser responsável por validar os limites vigentes.
 

@@ -30,23 +30,48 @@ O controle de resgate não faz parte da responsabilidade da entidade no MVP.
 
 Campos previstos para o MVP:
 
-| Campo         | Tipo        | Obrigatório | Descrição                                       |
-| ------------- | ----------- | ----------: | ----------------------------------------------- |
-| `id`          | UUID        |         Sim | Identificador do cupom                          |
-| `company_id`  | UUID        |         Sim | Negócio responsável pelo cupom                  |
-| `title`       | VARCHAR     |         Sim | Nome do cupom                                   |
-| `description` | TEXT        |         Não | Descrição do benefício                          |
-| `code`        | VARCHAR     |         Não | Código utilizado pelo cliente, quando aplicável |
-| `media_id`    | UUID        |         Não | Imagem associada ao cupom                       |
-| `starts_at`   | TIMESTAMPTZ |         Sim | Início da validade                              |
-| `expires_at`  | TIMESTAMPTZ |         Sim | Término da validade                             |
-| `status`      | ENUM        |         Sim | Estado do cupom                                 |
-| `created_at`  | TIMESTAMPTZ |         Sim | Momento de criação                              |
-| `updated_at`  | TIMESTAMPTZ |         Sim | Momento da última alteração                     |
+| Campo         | Tipo           | Obrigatório | Descrição                                       |
+| ------------- | -------------- | ----------: | ----------------------------------------------- |
+| `id`          | UUID           |         Sim | Identificador do cupom                          |
+| `company_id`  | UUID           |         Sim | Negócio responsável pelo cupom                  |
+| `title`       | VARCHAR        |         Sim | Nome do cupom                                   |
+| `description` | TEXT           |         Não | Descrição do benefício                          |
+| `code`        | VARCHAR        |         Não | Código utilizado pelo cliente, quando aplicável |
+| `media_id`    | UUID           |         Não | Imagem associada ao cupom                       |
+| `starts_at`   | TIMESTAMPTZ    |         Sim | Início da validade                              |
+| `expires_at`  | TIMESTAMPTZ    |         Sim | Término da validade                             |
+| `status`      | `CouponStatus` |         Sim | Estado persistido do cupom                      |
+| `created_at`  | TIMESTAMPTZ    |         Sim | Momento de criação                              |
+| `updated_at`  | TIMESTAMPTZ    |         Sim | Momento da última alteração                     |
 
-O cupom poderá utilizar **imagem ou código** como forma de apresentação do benefício.
+`code` e `media_id` são opcionais.
 
-A utilização de `code` é opcional porque nem todo cupom precisa possuir um código textual.
+O cupom pode apresentar o benefício por meio de código, imagem, descrição ou combinação desses elementos.
+
+Não é necessária uma constraint estrutural exigindo a presença de `code` ou `media_id` no MVP.
+
+`starts_at` e `expires_at` representam instantes absolutos no tempo.
+
+Diferentemente dos horários recorrentes de `CompanyBusinessHourPeriod`, esses campos devem ser armazenados como timestamps com referência temporal consistente (`TIMESTAMPTZ` no PostgreSQL).
+
+### 3.1. Enum `CouponStatus`
+
+```text
+DRAFT
+PUBLISHED
+ARCHIVED
+```
+
+`ACTIVE` e `EXPIRED` não são estados persistidos.
+A disponibilidade temporal do cupom deve ser determinada pela combinação de:
+
+```
+status
+starts_at
+expires_at
+```
+
+Um cupom somente pode ser considerado disponível quando estiver em `PUBLISHED` e dentro de seu período de validade.
 
 ---
 
@@ -78,7 +103,7 @@ A mídia é gerenciada pelo Media Module e armazenada externamente.
 
 ### FeedPublication
 
-Um cupom poderá ser distribuído pelo Feed.
+Um cupom poderá ser distribuído pelo `Feed`.
 
 ```text
 Coupon
@@ -87,7 +112,9 @@ Coupon
 FeedPublication
 ```
 
-O `Feed` não se torna responsável pelas regras do cupom.
+A distribuição pertence ao contexto `Feed`.
+`Coupon` permanece como fonte da verdade sobre o conteúdo e sua validade.
+A relação persistente com `FeedPublication` será definida conforme o modelo estrutural adotado para `FeedPublication`. O `Coupon` não deve incorporar campos ou lógica de `Feed` apenas para representar sua distribuição.
 
 ---
 
@@ -102,13 +129,17 @@ No MVP:
 - `expires_at` deve ser posterior a `starts_at`;
 - o cupom pode possuir uma imagem;
 - o cupom pode possuir um código;
-- o cupom pode utilizar imagem ou código para apresentar o benefício;
+- `code` e `media_id` são opcionais.
 - o Bairu não controla o resgate do cupom;
 - a validação ou aplicação do benefício ocorre fora da plataforma;
 - cupons fora do período de validade não devem ser apresentados como ativos;
 - cupons podem ser distribuídos pelo Feed quando publicados.
 
 Regras específicas de quantidade, duração e disponibilidade devem permanecer nas regras do módulo `Content` e dos planos aplicáveis.
+
+O cupom pode apresentar o benefício por meio de código, imagem, descrição ou combinação desses elementos.
+
+Não é necessária uma constraint estrutural exigindo a presença de `code` ou `media_id` no MVP.
 
 ---
 
@@ -135,6 +166,8 @@ starts_at
 expires_at
 ```
 
+Um cupom em `PUBLISHED` somente é considerado disponível quando:`starts_at <= current_time < expires_at`. Fora desse intervalo, o cupom não deve ser apresentado como benefício ativo, sem necessidade de alterar o valor persistido de status.
+
 A expiração do cupom não implica automaticamente Hard Delete.
 
 O registro poderá permanecer armazenado para histórico, auditoria ou outras finalidades legítimas.
@@ -150,15 +183,12 @@ Devem ser aplicadas:
 - `FOREIGN KEY` em `media_id`, quando utilizado;
 - `NOT NULL` nos campos obrigatórios;
 - valores controlados para `status`;
-- `expires_at > starts_at`.
+- `expires_at > starts_at`. A regra deve ser protegida por `CHECK` no banco: `CHECK (expires_at > starts_at)`
 
-Caso `code` possua uma regra de unicidade, ela deverá ser definida de acordo com o escopo da regra.
+`code` não possui constraint de unicidade no MVP.
+O código é uma informação de apresentação do benefício e não funciona como identificador técnico ou mecanismo de resgate.
 
-Por exemplo, caso o código precise ser único apenas dentro de um negócio:
-
-```text
-UNIQUE (company_id, code)
-```
+Uma regra de unicidade poderá ser introduzida futuramente caso o domínio passe a controlar resgates ou validação de códigos.
 
 A necessidade dessa constraint deve ser definida conforme a regra real de negócio.
 
@@ -166,18 +196,17 @@ A necessidade dessa constraint deve ser definida conforme a regra real de negóc
 
 ## 8. Índices
 
-Índices candidatos:
+O índice principal é:
 
 ```text
 idx_coupons_company_id
-idx_coupons_status
-idx_coupons_starts_at
-idx_coupons_expires_at
 ```
 
-Caso códigos sejam utilizados frequentemente para consulta, um índice ou constraint de unicidade poderá ser adicionado conforme a regra definida.
+Esse índice suporta a recuperação dos cupons pertencentes a uma empresa.
 
-Índices adicionais devem ser introduzidos conforme os padrões reais de consulta.
+Consultas relacionadas à disponibilidade temporal poderão ser otimizadas posteriormente conforme os padrões reais de consulta.
+
+Não devem ser criados índices adicionais antecipadamente sem necessidade identificada.
 
 ---
 

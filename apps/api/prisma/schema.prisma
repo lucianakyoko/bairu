@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,538 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  WEBSITE
+  BLOG
+  FACEBOOK
+  WHATSAPP
+  YOUTUBE
+  TIKTOK
+  LINKEDIN
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum JobEmploymentType {
+  FULL_TIME
+  PART_TIME
+  TEMPORARY
+  INTERNSHIP
+  APPRENTICESHIP
+  CONTRACTOR
+  OTHER
+}
+
+enum JobVacancyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CouponStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum FeedContentType {
+  PROMOTION
+  NEWS
+  COUPON
+  EVENT
+  JOB_VACANCY
+}
+
+enum FeedPublicationStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AuditLogAction {
+  CREATE
+  UPDATE
+  ARCHIVE
+  RESTORE
+  HARD_DELETE
+  PERMISSION_CHANGE
+  PRIVACY_ACTION
+}
+
+// ============================================================
+// MODELS
+// ============================================================
+
+model User {
+  id             String     @id @default(uuid()) @db.Uuid
+  name           String
+  email          String     @unique
+  passwordHash   String     @map("password_hash")
+  phone          String?
+  profileMediaId String?    @unique @map("profile_media_id") @db.Uuid
+  role           UserRole   @default(USER)
+  status         UserStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  companies      Company[]
+  auditLogs      AuditLog[]
+  favorites      Favorite[]
+  companyReviews CompanyReview[]
+
+  profileMedia Media? @relation("UserProfileMedia", fields: [profileMediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@map("users")
+}
+
+model Company {
+  id          String @id @default(uuid()) @db.Uuid
+  ownerUserId String @map("owner_user_id") @db.Uuid
+
+  name        String
+  slug        String  @unique
+  description String?
+  document    String?
+  phone       String?
+  email       String?
+  websiteUrl  String? @map("website_url")
+
+  profileMediaId String? @unique @map("profile_media_id") @db.Uuid
+  coverMediaId   String? @unique @map("cover_media_id") @db.Uuid
+
+  status CompanyStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  profileMedia Media? @relation("CompanyProfileMedia", fields: [profileMediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  coverMedia   Media? @relation("CompanyCoverMedia", fields: [coverMediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  companyCategories CompanyCategory[]
+  externalLinks     CompanyExternalLink[]
+  businessDays      CompanyBusinessDay[]
+  scheduleOverrides CompanyScheduleOverride[]
+  catalogItems      CompanyCatalogItem[]
+
+  promotions       Promotion[]
+  jobVacancies     JobVacancy[]
+  news             News[]
+  events           Event[]
+  coupons          Coupon[]
+  feedPublications FeedPublication[]
+
+  favorites Favorite[]
+  reviews   CompanyReview[]
+
+  @@index([ownerUserId])
+  @@map("companies")
+}
+
+model Category {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String         @unique
+  description String?
+  parentId    String?        @map("parent_id") @db.Uuid
+  status      CategoryStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  children Category[] @relation("CategoryHierarchy")
+
+  companyCategories CompanyCategory[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model CompanyCategory {
+  id         String @id @default(uuid()) @db.Uuid
+  companyId  String @map("company_id") @db.Uuid
+  categoryId String @map("category_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([companyId, categoryId])
+  @@index([categoryId, companyId])
+  @@map("company_categories")
+}
+
+model CompanyExternalLink {
+  id        String         @id @default(uuid()) @db.Uuid
+  companyId String         @map("company_id") @db.Uuid
+  platform  SocialPlatform
+  url       String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([companyId, platform])
+  @@index([companyId])
+  @@map("company_external_links")
+}
+
+model CompanyBusinessDay {
+  id        String    @id @default(uuid()) @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  dayOfWeek DayOfWeek @map("day_of_week")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  periods CompanyBusinessHourPeriod[]
+
+  @@unique([companyId, dayOfWeek])
+  @@map("company_business_days")
+}
+
+model CompanyBusinessHourPeriod {
+  id                   String   @id @default(uuid()) @db.Uuid
+  companyBusinessDayId String   @map("company_business_day_id") @db.Uuid
+  startsAt             DateTime @map("starts_at") @db.Time(0)
+  endsAt               DateTime @map("ends_at") @db.Time(0)
+  observation          String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  companyBusinessDay CompanyBusinessDay @relation(fields: [companyBusinessDayId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([companyBusinessDayId])
+  @@map("company_business_hour_periods")
+}
+
+model CompanyScheduleOverride {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  date        DateTime @db.Date
+  isClosed    Boolean  @map("is_closed")
+  observation String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  periods CompanyScheduleOverridePeriod[]
+
+  @@unique([companyId, date])
+  @@map("company_schedule_overrides")
+}
+
+model CompanyScheduleOverridePeriod {
+  id                        String   @id @default(uuid()) @db.Uuid
+  companyScheduleOverrideId String   @map("company_schedule_override_id") @db.Uuid
+  startsAt                  DateTime @map("starts_at") @db.Time(0)
+  endsAt                    DateTime @map("ends_at") @db.Time(0)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  companyScheduleOverride CompanyScheduleOverride @relation(fields: [companyScheduleOverrideId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([companyScheduleOverrideId])
+  @@map("company_schedule_override_periods")
+}
+
+model CompanyCatalogItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  name        String
+  description String?
+  price       Decimal?
+  mediaId     String?  @map("media_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  media   Media?  @relation("CompanyCatalogItemMedia", fields: [mediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_company_catalog_items_company_id")
+  @@map("company_catalog_items")
+}
+
+// ============================================================
+// CONTENT
+// ============================================================
+
+model Promotion {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  title       String   @db.VarChar(255)
+  description String?
+  mediaId     String?  @map("media_id") @db.Uuid
+  startsAt    DateTime @map("starts_at") @db.Timestamptz(6)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  media   Media?  @relation("PromotionMedia", fields: [mediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_promotions_company_id")
+  @@map("promotions")
+}
+
+model JobVacancy {
+  id             String             @id @default(uuid()) @db.Uuid
+  companyId      String             @map("company_id") @db.Uuid
+  title          String
+  description    String
+  location       String?
+  employmentType JobEmploymentType? @map("employment_type")
+  status         JobVacancyStatus   @default(DRAFT)
+  startsAt       DateTime?          @map("starts_at") @db.Timestamptz(6)
+  expiresAt      DateTime?          @map("expires_at") @db.Timestamptz(6)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_job_vacancies_company_id")
+  @@index([status], map: "idx_job_vacancies_status")
+  @@index([expiresAt], map: "idx_job_vacancies_expires_at")
+  @@map("job_vacancies")
+}
+
+model News {
+  id        String     @id @default(uuid()) @db.Uuid
+  companyId String     @map("company_id") @db.Uuid
+  title     String
+  content   String     @db.Text
+  mediaId   String?    @map("media_id") @db.Uuid
+  status    NewsStatus
+  startsAt  DateTime?  @map("starts_at") @db.Timestamptz(6)
+  expiresAt DateTime?  @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  media   Media?  @relation("NewsMedia", fields: [mediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_news_company_id")
+  @@index([status], map: "idx_news_status")
+  @@index([startsAt], map: "idx_news_starts_at")
+  @@index([expiresAt], map: "idx_news_expires_at")
+  @@map("news")
+}
+
+model Event {
+  id          String      @id @default(uuid()) @db.Uuid
+  companyId   String      @map("company_id") @db.Uuid
+  title       String
+  description String      @db.Text
+  startsAt    DateTime    @map("starts_at") @db.Timestamptz(6)
+  endsAt      DateTime?   @map("ends_at") @db.Timestamptz(6)
+  location    String?
+  mediaId     String?     @map("media_id") @db.Uuid
+  status      EventStatus
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  media   Media?  @relation("EventMedia", fields: [mediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_events_company_id")
+  @@index([status], map: "idx_events_status")
+  @@index([startsAt], map: "idx_events_starts_at")
+  @@index([endsAt], map: "idx_events_ends_at")
+  @@map("events")
+}
+
+model Coupon {
+  id          String       @id @default(uuid()) @db.Uuid
+  companyId   String       @map("company_id") @db.Uuid
+  title       String
+  description String?
+  code        String?
+  mediaId     String?      @map("media_id") @db.Uuid
+  startsAt    DateTime     @map("starts_at") @db.Timestamptz(6)
+  expiresAt   DateTime     @map("expires_at") @db.Timestamptz(6)
+  status      CouponStatus
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  media   Media?  @relation("CouponMedia", fields: [mediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([companyId], map: "idx_coupons_company_id")
+  @@index([status], map: "idx_coupons_status")
+  @@index([startsAt], map: "idx_coupons_starts_at")
+  @@index([expiresAt], map: "idx_coupons_expires_at")
+  @@map("coupons")
+}
+
+// ============================================================
+// FEED
+// ============================================================
+
+model FeedPublication {
+  id          String                @id @default(uuid()) @db.Uuid
+  companyId   String                @map("company_id") @db.Uuid
+  contentType FeedContentType       @map("content_type")
+  contentId   String                @map("content_id") @db.Uuid
+  publishedAt DateTime              @default(now()) @map("published_at") @db.Timestamptz(6)
+  expiresAt   DateTime?             @map("expires_at") @db.Timestamptz(6)
+  status      FeedPublicationStatus @default(ACTIVE)
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([contentType, contentId])
+  @@index([companyId], map: "idx_feed_publications_company_id")
+  @@index([status], map: "idx_feed_publications_status")
+  @@index([contentType], map: "idx_feed_publications_content_type")
+  @@index([publishedAt], map: "idx_feed_publications_published_at")
+  @@index([expiresAt], map: "idx_feed_publications_expires_at")
+  @@map("feed_publications")
+}
+
+// ============================================================
+// COMMUNITY
+// ============================================================
+
+model Favorite {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([userId, companyId], map: "uk_favorites_user_company")
+  @@index([companyId], map: "idx_favorites_company_id")
+  @@index([userId], map: "idx_favorites_user_id")
+  @@map("favorites")
+}
+
+model CompanyReview {
+  id        String @id @default(uuid()) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  companyId String @map("company_id") @db.Uuid
+
+  rating  Int     @db.SmallInt
+  comment String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([userId, companyId], map: "uk_company_reviews_user_company")
+  @@index([companyId], map: "idx_company_reviews_company_id")
+  @@index([createdAt], map: "idx_company_reviews_created_at")
+  @@map("company_reviews")
+}
+
+// ============================================================
+// ADMINISTRATION
+// ============================================================
+
+model AuditLog {
+  id          String         @id @default(uuid()) @db.Uuid
+  actorUserId String?        @map("actor_user_id") @db.Uuid
+  action      AuditLogAction
+  entityType  String         @map("entity_type") @db.VarChar(100)
+  entityId    String         @map("entity_id") @db.Uuid
+  metadata    Json?
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actorUser User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull, onUpdate: Restrict)
+
+  @@index([entityType, entityId], map: "idx_audit_logs_entity")
+  @@index([actorUserId], map: "idx_audit_logs_actor_user_id")
+  @@index([createdAt], map: "idx_audit_logs_created_at")
+  @@map("audit_logs")
+}
+
+// ============================================================
+// SHARED INFRASTRUCTURE
+// ============================================================
+
+model Media {
+  id              String   @id @default(uuid()) @db.Uuid
+  provider        String   @db.VarChar(50)
+  providerAssetId String   @map("provider_asset_id") @db.VarChar(255)
+  storageKey      String   @map("storage_key") @db.VarChar(500)
+  mimeType        String   @map("mime_type") @db.VarChar(100)
+  fileSize        BigInt   @map("file_size")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  userProfile     User?                @relation("UserProfileMedia")
+  companyProfiles Company?             @relation("CompanyProfileMedia")
+  companyCovers   Company?             @relation("CompanyCoverMedia")
+  catalogItems    CompanyCatalogItem[] @relation("CompanyCatalogItemMedia")
+  promotions      Promotion[]          @relation("PromotionMedia")
+  news            News[]               @relation("NewsMedia")
+  events          Event[]              @relation("EventMedia")
+  coupons         Coupon[]             @relation("CouponMedia")
+
+  @@unique([provider, providerAssetId], map: "uq_media_provider_asset")
+  @@index([provider], map: "idx_media_provider")
+  @@map("media")
 }

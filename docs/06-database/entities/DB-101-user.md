@@ -229,6 +229,13 @@ A relação é opcional.
 
 No MVP, uma mesma `Media` não deve ser compartilhada entre diferentes entidades consumidoras.
 
+A exclusão da `Media` referenciada deve remover a referência
+em `User.profile_media_id`, sem excluir o usuário.
+
+A exclusão do usuário não deve depender de CASCADE para remover
+automaticamente a `Media`. O lifecycle da mídia deve ser tratado
+pela política própria do módulo `Media`.
+
 As regras gerais estão definidas em `CON-007-media-architecture-and-lifecycle-standards.md`.
 
 ---
@@ -304,6 +311,12 @@ PRIMARY KEY (id)
 ```text
 UNIQUE (email)
 ```
+
+### Unique — profile_media_id
+
+Quando `profile_media_id` estiver presente:
+
+`UNIQUE (profile_media_id)`
 
 ### Foreign Key
 

@@ -138,12 +138,6 @@ A constraint:
 UNIQUE (company_id, day_of_week)
 ```
 
-já fornece um índice adequado para consultas que utilizem essa combinação.
-
-Um índice adicional por `company_id` deve ser avaliado conforme a implementação e os padrões de consulta.
-
-Como os registros de uma empresa serão frequentemente recuperados em conjunto, a estrutura deve permitir consulta eficiente de todos os seus dias de funcionamento.
-
 ---
 
 ## 8. Regras de Domínio
@@ -151,7 +145,9 @@ Como os registros de uma empresa serão frequentemente recuperados em conjunto, 
 - Cada registro representa um único dia da semana para uma empresa.
 - Uma empresa pode possuir configuração para cada um dos sete dias da semana.
 - Uma empresa não pode possuir duas configurações para o mesmo dia.
-- Um dia pode existir sem períodos de horário.
+- Um `CompanyBusinessDay` representa um dia incluído na agenda regular da empresa.
+- Um dia sem `CompanyBusinessDay` não possui funcionamento regular configurado.
+- Um `CompanyBusinessDay` deve possuir pelo menos um `CompanyBusinessHourPeriod`.
 - Os horários pertencem a `CompanyBusinessHourPeriod`.
 - A existência de `CompanyBusinessDay` não significa necessariamente que o negócio esteja aberto naquele momento.
 - Exceções ao funcionamento regular pertencem a `CompanyScheduleOverride`.
@@ -166,7 +162,17 @@ O comportamento exato de um dia sem períodos de horário deverá ser definido e
 
 A configuração representa parte da agenda regular da empresa e não possui necessidade de histórico próprio no MVP.
 
-Quando uma `Company` for removida, seus registros de `CompanyBusinessDay` poderão ser removidos em cascata, juntamente com os períodos associados, conforme a estratégia definida nas entidades relacionadas.
+Quando uma `Company` for removida, seus registros de
+`CompanyBusinessDay` deverão ser removidos automaticamente.
+
+A relação `Company → CompanyBusinessDay` utilizará `ON DELETE CASCADE`.
+
+Quando um `CompanyBusinessDay` for removido, seus
+`CompanyBusinessHourPeriod` associados também deverão ser removidos
+automaticamente.
+
+A relação `CompanyBusinessDay → CompanyBusinessHourPeriod` utilizará
+`ON DELETE CASCADE`.
 
 Soft Delete não é necessário.
 
