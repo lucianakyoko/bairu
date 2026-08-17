@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client.js";
+import { seedCategories } from "./seed/reference-data/categories.js";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -18,7 +19,10 @@ const prisma = new PrismaClient({
 
 async function main() {
   console.log("🌱 Seed started.");
-  console.log("Database connection configured successfully.");
+
+  await seedCategories(prisma);
+
+  console.log("✅ Seed completed.");
 }
 
 main()
