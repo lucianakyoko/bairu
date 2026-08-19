@@ -412,117 +412,30 @@ A entidade `CompanyExternalLink` passa a ser a fonte de verdade para o website e
 
 ---
 
-## 10. Slug
+## 10. Identidade pública da Company
 
-O `slug` continuará sendo um identificador textual único utilizado para URLs públicas.
+A Company possui uma identidade pública composta por seu nome comercial (`name`) e um identificador público escolhido pelo usuário (`username`).
 
-A constraint: `UNIQUE(slug)` continuará sendo garantida pelo banco de dados.
+O campo `slug` não faz parte mais do modelo de persistência da Company.
 
-A aplicação deverá validar a estrutura do `slug` antes da persistência.
+O `username` deve:
 
-A unicidade definitiva será garantida pela combinação de:
+- ser obrigatório;
+- ser único;
+- utilizar somente caracteres ASCII minúsculos;
+- permitir letras, números, `_` e `-`;
+- possuir entre 3 e 30 caracteres;
+- não iniciar ou terminar com `_` ou `-`;
+- respeitar uma lista de usernames reservados.
 
-```
-validação da aplicação
-        +
-UNIQUE no banco
-```
+O `username` representa a identidade pública da Company e pode ser alterado posteriormente quando o novo valor estiver disponível.
 
-A aplicação não deverá confiar exclusivamente em uma consulta prévia para garantir unicidade.
+As relações internas do domínio devem continuar utilizando `Company.id` como referência. O `username` não deve ser utilizado como chave
+estrangeira ou identificador de relacionamento entre entidades.
 
-Isso ocorre porque duas requisições concorrentes podem verificar simultaneamente que determinado `slug` está disponível.
+Quando um `username` for alterado, o valor anterior não será imediatamente disponibilizado para outra Company.
 
-A `constraint` do banco continua sendo a autoridade final.
-
-Conceitualmente:
-
-```
-request
-   ↓
-validar formato
-   ↓
-tentar persistir
-   ↓
-UNIQUE(slug)
-   ↓
-┌───────────────┬───────────────┐
-│ sucesso       │ conflito      │
-│               │               │
-│ 201/200       │ 409 Conflict  │
-└───────────────┴───────────────┘
-```
-
-## 11. Slug durante o arquivamento
-
-Quando uma `Company` for arquivada, seu `slug` público original será liberado para utilização futura.
-
-Portanto:
-
-```
-ACTIVE
-
-slug = "padaria-centro"
-```
-
-poderá tornar-se:
-
-```
-ARCHIVED
-
-slug = "padaria-centro-archived"
-```
-
-Isso permite que uma nova `Company` utilize posteriormente:
-
-`slug = "padaria-centro"`
-
-quando o `slug` estiver disponível.
-
-A alteração do `slug` fará parte da operação de arquivamento e deverá respeitar a `constraint` de unicidade.
-
-### 11.1. Conflitos de slug arquivado
-
-A aplicação não deverá assumir que: `<slug>-archived`
-
-estará necessariamente disponível.
-
-Caso já exista uma `Company` com esse `slug`, deverá ser utilizado um sufixo adicional conforme estratégia determinística da aplicação.
-
-Exemplo:
-
-```
-padaria-centro
-↓
-padaria-centro-archived
-```
-
-se indisponível:
-
-```
-padaria-centro-archived-2
-```
-
-e assim sucessivamente.
-
-A estratégia exata de geração do sufixo poderá ser refinada durante a implementação, desde que preserve:
-
-- unicidade;
-- determinismo;
-- validade do slug;
-- previsibilidade;
-- ausência de colisões.
-
----
-
-## 12. URLs públicas após arquivamento
-
-O arquivamento pode alterar o `slug` público da `Company`.
-
-Consequentemente, a URL: `/empresas/padaria-centro` poderá deixar de representar a `Company` arquivada.
-
-A preservação de URLs históricas, redirects permanentes ou estratégias de SEO não faz parte do escopo do MVP.
-
-Caso essa necessidade surja posteriormente, deverá ser tratada através de uma decisão específica sobre histórico de URLs e aliases de slug.
+A implementação de histórico, aliases ou redirecionamentos de usernames anteriores não faz parte do escopo atual e poderá ser avaliada posteriormente.
 
 ---
 
