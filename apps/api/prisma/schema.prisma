@@ -21,9 +21,15 @@ enum UserStatus {
   INACTIVE
 }
 
+enum PersonType {
+  INDIVIDUAL
+  LEGAL_ENTITY
+}
+
 enum CompanyStatus {
   ACTIVE
   INACTIVE
+  SUSPENDED
   ARCHIVED
 }
 
@@ -141,13 +147,13 @@ model Company {
   id          String @id @default(uuid()) @db.Uuid
   ownerUserId String @map("owner_user_id") @db.Uuid
 
+  username    String     @unique
+  personType  PersonType @map("person_type")
   name        String
-  slug        String  @unique
   description String?
   document    String?
   phone       String?
   email       String?
-  websiteUrl  String? @map("website_url")
 
   profileMediaId String? @unique @map("profile_media_id") @db.Uuid
   coverMediaId   String? @unique @map("cover_media_id") @db.Uuid
@@ -157,8 +163,7 @@ model Company {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-
+  owner        User   @relation(fields: [ownerUserId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   profileMedia Media? @relation("CompanyProfileMedia", fields: [profileMediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   coverMedia   Media? @relation("CompanyCoverMedia", fields: [coverMediaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { seedCategories } from "./seed/reference-data/categories.js";
+import { seedDevelopmentUser } from "./seed/development/development-user.js";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -21,6 +22,7 @@ async function main() {
   console.log("🌱 Seed started.");
 
   await seedCategories(prisma);
+  await seedDevelopmentUser(prisma);
 
   console.log("✅ Seed completed.");
 }
