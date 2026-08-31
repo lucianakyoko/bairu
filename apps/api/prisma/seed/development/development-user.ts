@@ -4,31 +4,52 @@ import { PasswordService } from "../../../src/common/security/password.service.j
 export async function seedDevelopmentUser(prisma: PrismaClient) {
   const passwordService = new PasswordService();
 
-  const email = "dev@bairu.local";
   const password = "dev-password";
-
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    console.log(`👤 Development user already exists: ${existingUser.id}`);
-    return existingUser;
-  }
-
   const passwordHash = await passwordService.hash(password);
 
-  const user = await prisma.user.create({
-    data: {
+  const user = await prisma.user.upsert({
+    where: {
+      email: "dev@bairu.local",
+    },
+    update: {
+      role: "USER",
+      status: "ACTIVE",
+    },
+    create: {
       name: "Development User",
-      email,
+      email: "dev@bairu.local",
       passwordHash,
       role: "USER",
       status: "ACTIVE",
     },
   });
 
-  console.log(`👤 Development user created: ${user.id}`);
+  console.log(`👤 Development user ready: ${user.id}`);
 
-  return user;
+  const adminPassword = "admin-password";
+  const adminPasswordHash = await passwordService.hash(adminPassword);
+
+  const admin = await prisma.user.upsert({
+    where: {
+      email: "admin@bairu.local",
+    },
+    update: {
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+    create: {
+      name: "Development Admin",
+      email: "admin@bairu.local",
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
+
+  console.log(`🛡️ Development admin ready: ${admin.id}`);
+
+  return {
+    user,
+    admin,
+  };
 }
