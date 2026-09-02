@@ -38,6 +38,7 @@
     "@bairu/config-eslint": "workspace:*",
     "@bairu/config-prettier": "workspace:*",
     "@bairu/config-typescript": "workspace:*",
+    "@jest/globals": "^30.5.1",
     "@nestjs/cli": "^11",
     "@types/jest": "^30.0.0",
     "@types/node": "^22",
