@@ -171,4 +171,170 @@ describe("CompanyService", () => {
       status: HttpStatus.NOT_FOUND,
     });
   });
+
+  it("deactivates an active company", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Active Company",
+      username: `active-company-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const result = await service.deactivate(company.id, owner.id);
+
+    expect(result.id).toBe(company.id);
+    expect(result.status).toBe("INACTIVE");
+  });
+
+  it.each(["INACTIVE", "SUSPENDED", "ARCHIVED"] as const)(
+    "throws COMPANY_INVALID_STATUS_TRANSITION when deactivating a %s company",
+    async (status) => {
+      const owner = await createTestUser(prisma);
+
+      const company = await service.create(owner.id, {
+        name: "Company",
+        username: `deactivate-invalid-${crypto.randomUUID().slice(0, 8)}`,
+        personType: CompanyPersonType.LEGAL_ENTITY,
+      });
+
+      await prisma.company.update({
+        where: {
+          id: company.id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      await expect(
+        service.deactivate(company.id, owner.id),
+      ).rejects.toMatchObject({
+        response: {
+          error: {
+            code: ErrorCode.COMPANY_INVALID_STATUS_TRANSITION,
+            message: "Company cannot be deactivated from its current status.",
+          },
+        },
+        status: HttpStatus.CONFLICT,
+      });
+    },
+  );
+
+  it("reactivates an inactive company", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Inactive Company",
+      username: `inactive-company-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await service.deactivate(company.id, owner.id);
+
+    const result = await service.reactivate(company.id, owner.id);
+
+    expect(result.id).toBe(company.id);
+    expect(result.status).toBe("ACTIVE");
+  });
+
+  it.each(["ACTIVE", "SUSPENDED", "ARCHIVED"] as const)(
+    "throws COMPANY_INVALID_STATUS_TRANSITION when reactivating a %s company",
+    async (status) => {
+      const owner = await createTestUser(prisma);
+
+      const company = await service.create(owner.id, {
+        name: "Company",
+        username: `reactivate-invalid-${crypto.randomUUID().slice(0, 8)}`,
+        personType: CompanyPersonType.LEGAL_ENTITY,
+      });
+
+      await prisma.company.update({
+        where: {
+          id: company.id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      await expect(
+        service.reactivate(company.id, owner.id),
+      ).rejects.toMatchObject({
+        response: {
+          error: {
+            code: ErrorCode.COMPANY_INVALID_STATUS_TRANSITION,
+            message: "Company cannot be reactivated from its current status.",
+          },
+        },
+        status: HttpStatus.CONFLICT,
+      });
+    },
+  );
+
+  it("archives an active company", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Active Company",
+      username: `archive-active-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const result = await service.archive(company.id, owner.id);
+
+    expect(result.id).toBe(company.id);
+    expect(result.status).toBe("ARCHIVED");
+  });
+
+  it("archives an inactive company", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Inactive Company",
+      username: `archive-inactive-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await service.deactivate(company.id, owner.id);
+
+    const result = await service.archive(company.id, owner.id);
+
+    expect(result.id).toBe(company.id);
+    expect(result.status).toBe("ARCHIVED");
+  });
+
+  it.each(["SUSPENDED", "ARCHIVED"] as const)(
+    "throws COMPANY_INVALID_STATUS_TRANSITION when archiving a %s company",
+    async (status) => {
+      const owner = await createTestUser(prisma);
+
+      const company = await service.create(owner.id, {
+        name: "Company",
+        username: `archive-invalid-${crypto.randomUUID().slice(0, 8)}`,
+        personType: CompanyPersonType.LEGAL_ENTITY,
+      });
+
+      await prisma.company.update({
+        where: {
+          id: company.id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      await expect(service.archive(company.id, owner.id)).rejects.toMatchObject(
+        {
+          response: {
+            error: {
+              code: ErrorCode.COMPANY_INVALID_STATUS_TRANSITION,
+              message: "Company cannot be archived from its current status.",
+            },
+          },
+          status: HttpStatus.CONFLICT,
+        },
+      );
+    },
+  );
 });
