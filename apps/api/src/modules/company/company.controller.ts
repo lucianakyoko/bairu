@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -61,6 +63,7 @@ export class CompanyController {
   }
 
   @UseGuards(CompanyOwnershipGuard)
+  @HttpCode(HttpStatus.OK)
   @Post(":id/archive")
   async archive(
     @Param("id", ParseUUIDPipe) id: string,
@@ -75,6 +78,7 @@ export class CompanyController {
   }
 
   @UseGuards(CompanyOwnershipGuard)
+  @HttpCode(HttpStatus.OK)
   @Post(":id/deactivate")
   async deactivate(
     @Param("id", ParseUUIDPipe) id: string,
@@ -89,6 +93,7 @@ export class CompanyController {
   }
 
   @UseGuards(CompanyOwnershipGuard)
+  @HttpCode(HttpStatus.OK)
   @Post(":id/reactivate")
   async reactivate(
     @Param("id", ParseUUIDPipe) id: string,

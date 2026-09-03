@@ -1,5 +1,7 @@
 import {
   Controller,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -16,6 +18,7 @@ import { plainToInstance } from "class-transformer";
 export class AdminCompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
+  @HttpCode(HttpStatus.OK)
   @Post(":id/suspend")
   async suspend(
     @Param("id", ParseUUIDPipe) id: string,
@@ -27,6 +30,7 @@ export class AdminCompanyController {
     });
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post(":id/restore")
   async restore(@Param("id", ParseUUIDPipe) id: string) {
     return this.companyService.restore(id);
