@@ -32,7 +32,12 @@ export class AdminCompanyController {
 
   @HttpCode(HttpStatus.OK)
   @Post(":id/restore")
-  async restore(@Param("id", ParseUUIDPipe) id: string) {
-    return this.companyService.restore(id);
+  async restore(
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<CompanyStatusResponseDto> {
+    const company = await this.companyService.restore(id);
+    return plainToInstance(CompanyStatusResponseDto, company, {
+      excludeExtraneousValues: true,
+    });
   }
 }

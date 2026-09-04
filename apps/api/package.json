@@ -12,7 +12,7 @@
     "lint": "eslint --max-warnings=0 .",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc -p tsconfig.spec.json --noEmit",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:test": "node scripts/with-env.mjs test prisma migrate deploy",

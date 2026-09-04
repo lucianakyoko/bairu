@@ -47,9 +47,10 @@ export class CompanyService {
   }
 
   async findById(id: string) {
-    const company = await this.prisma.company.findUnique({
+    const company = await this.prisma.company.findFirst({
       where: {
         id,
+        status: CompanyStatus.ACTIVE,
       },
     });
 
@@ -89,18 +90,35 @@ export class CompanyService {
   }
 
   async archive(companyId: string, ownerUserId: string) {
-    const company = await this.prisma.company.findFirst({
+    const result = await this.prisma.company.updateMany({
       where: {
         id: companyId,
         ownerUserId,
+        status: {
+          in: [CompanyStatus.ACTIVE, CompanyStatus.INACTIVE],
+        },
       },
+      data: {
+        status: CompanyStatus.ARCHIVED,
+      },
+    });
+
+    if (result.count === 1) {
+      return this.prisma.company.findUniqueOrThrow({
+        where: { id: companyId },
+        select: { id: true, status: true },
+      });
+    }
+
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
       select: {
-        id: true,
+        ownerUserId: true,
         status: true,
       },
     });
 
-    if (!company) {
+    if (!company || company.ownerUserId !== ownerUserId) {
       throw new AppException(
         ErrorCode.COMPANY_NOT_FOUND,
         "Company not found.",
@@ -108,29 +126,11 @@ export class CompanyService {
       );
     }
 
-    if (
-      company.status !== CompanyStatus.ACTIVE &&
-      company.status !== CompanyStatus.INACTIVE
-    ) {
-      throw new AppException(
-        ErrorCode.COMPANY_INVALID_STATUS_TRANSITION,
-        "Company cannot be archived from its current status.",
-        HttpStatus.CONFLICT,
-      );
-    }
-
-    return this.prisma.company.update({
-      where: {
-        id: company.id,
-      },
-      data: {
-        status: CompanyStatus.ARCHIVED,
-      },
-      select: {
-        id: true,
-        status: true,
-      },
-    });
+    throw new AppException(
+      ErrorCode.COMPANY_INVALID_STATUS_TRANSITION,
+      "Company cannot be archived from its current status.",
+      HttpStatus.CONFLICT,
+    );
   }
 
   async deactivate(companyId: string, ownerUserId: string) {
@@ -138,10 +138,10 @@ export class CompanyService {
       where: {
         id: companyId,
         ownerUserId,
-        status: "ACTIVE",
+        status: CompanyStatus.ACTIVE,
       },
       data: {
-        status: "INACTIVE",
+        status: CompanyStatus.INACTIVE,
       },
     });
 
@@ -288,7 +288,7 @@ export class CompanyService {
           },
         },
         data: {
-          status: "ACTIVE",
+          status: CompanyStatus.ACTIVE,
         },
         select: {
           id: true,

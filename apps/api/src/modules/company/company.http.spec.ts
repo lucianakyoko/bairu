@@ -156,6 +156,26 @@ describe("Company HTTP API", () => {
       expect(response.body).not.toHaveProperty("document");
     });
 
+    it.each([
+      CompanyStatus.INACTIVE,
+      CompanyStatus.SUSPENDED,
+      CompanyStatus.ARCHIVED,
+    ])("returns 404 when the company is %s", async (status) => {
+      const owner = await createTestUser(prisma);
+      const company = await createCompanyWithStatus(prisma, owner.id, status);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/v1/companies/${company.id}`)
+        .expect(404);
+
+      expect(response.body).toEqual({
+        error: {
+          code: "COMPANY_NOT_FOUND",
+          message: "Company not found.",
+        },
+      });
+    });
+
     it("returns 400 for an invalid uuid", async () => {
       const response = await request(app.getHttpServer())
         .get("/api/v1/companies/not-a-uuid")
