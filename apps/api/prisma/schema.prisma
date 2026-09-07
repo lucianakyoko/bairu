@@ -207,6 +207,20 @@ model Category {
   @@map("categories")
 }
 
+model CompanyUsernameHistory {
+  id                  String    @id @default(uuid()) @db.Uuid
+  companyId           String    @map("company_id") @db.Uuid
+  username            String
+  releasedAt          DateTime  @map("released_at") @db.Timestamptz(6)
+  cooldownUntil       DateTime  @map("cooldown_until") @db.Timestamptz(6)
+  claimedByCompanyId  String?   @map("claimed_by_company_id") @db.Uuid
+  claimedAt           DateTime? @map("claimed_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("company_username_history")
+}
+
 model CompanyCategory {
   id         String @id @default(uuid()) @db.Uuid
   companyId  String @map("company_id") @db.Uuid
