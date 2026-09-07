@@ -183,6 +183,9 @@ model Company {
   favorites Favorite[]
   reviews   CompanyReview[]
 
+  usernameHistories        CompanyUsernameHistory[] @relation("CompanyUsernameHistoryOwner")
+  claimedUsernameHistories CompanyUsernameHistory[] @relation("CompanyUsernameHistoryClaimant")
+
   @@index([ownerUserId])
   @@map("companies")
 }
@@ -208,15 +211,21 @@ model Category {
 }
 
 model CompanyUsernameHistory {
-  id                  String    @id @default(uuid()) @db.Uuid
-  companyId           String    @map("company_id") @db.Uuid
-  username            String
-  releasedAt          DateTime  @map("released_at") @db.Timestamptz(6)
-  cooldownUntil       DateTime  @map("cooldown_until") @db.Timestamptz(6)
-  claimedByCompanyId  String?   @map("claimed_by_company_id") @db.Uuid
-  claimedAt           DateTime? @map("claimed_at") @db.Timestamptz(6)
+  id                 String    @id @default(uuid()) @db.Uuid
+  companyId          String    @map("company_id") @db.Uuid
+  username           String
+  releasedAt         DateTime  @map("released_at") @db.Timestamptz(6)
+  cooldownUntil      DateTime  @map("cooldown_until") @db.Timestamptz(6)
+  claimedByCompanyId String?   @map("claimed_by_company_id") @db.Uuid
+  claimedAt          DateTime? @map("claimed_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  company         Company  @relation("CompanyUsernameHistoryOwner", fields: [companyId], references: [id])
+  claimedByCompany Company? @relation("CompanyUsernameHistoryClaimant", fields: [claimedByCompanyId], references: [id])
+
+  @@index([companyId])
+  @@index([username])
+  @@index([claimedByCompanyId])
 
   @@map("company_username_history")
 }
