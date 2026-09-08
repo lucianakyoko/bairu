@@ -1,6 +1,6 @@
-import { PrismaService } from "../database/prisma.service.js";
-import { createTestCompany } from "./factories/company.factory.js";
-import { createTestUser } from "./factories/user.factory.js";
+import { PrismaService } from "../../database/prisma.service.js";
+import { createTestCompany } from "./company.factory.js";
+import { createTestUser } from "./user.factory.js";
 
 describe("createTestCompany", () => {
   let prisma: PrismaService;

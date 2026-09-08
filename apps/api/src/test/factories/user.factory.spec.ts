@@ -1,5 +1,5 @@
-import { PrismaService } from "../database/prisma.service.js";
-import { createTestUser } from "./factories/user.factory.js";
+import { PrismaService } from "../../database/prisma.service.js";
+import { createTestUser } from "./user.factory.js";
 
 describe("createTestUser", () => {
   const prisma = new PrismaService();
