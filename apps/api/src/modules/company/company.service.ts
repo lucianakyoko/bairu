@@ -12,6 +12,7 @@ import { UpdateCompanyDto } from "./dto/update-company.dto.js";
 import { CompanyStatus } from "./enums/company-status.enum.js";
 import { UpdateCompanyUsernameDto } from "./dto/update-company-username.dto.js";
 import { normalizeUsername } from "./username/username.normalizer.js";
+import { USERNAME_CHANGE_RATE_LIMIT_DAYS } from "./company.constants.js";
 
 @Injectable()
 export class CompanyService {
@@ -372,6 +373,8 @@ export class CompanyService {
       );
     }
 
+    await this.ensureUsernameChangeRateLimit(companyId);
+
     const result = await this.prisma.company.updateMany({
       where: {
         id: companyId,
@@ -396,5 +399,38 @@ export class CompanyService {
         id: companyId,
       },
     });
+  }
+
+  private async ensureUsernameChangeRateLimit(
+    companyId: string,
+  ): Promise<void> {
+    const rateLimitThreshold = new Date();
+    rateLimitThreshold.setDate(
+      rateLimitThreshold.getDate() - USERNAME_CHANGE_RATE_LIMIT_DAYS,
+    );
+
+    const recentUsernameChange =
+      await this.prisma.companyUsernameHistory.findFirst({
+        where: {
+          companyId,
+          releasedAt: {
+            gt: rateLimitThreshold,
+          },
+        },
+        orderBy: {
+          releasedAt: "desc",
+        },
+        select: {
+          releasedAt: true,
+        },
+      });
+
+    if (recentUsernameChange) {
+      throw new AppException(
+        ErrorCode.COMPANY_USERNAME_CHANGE_RATE_LIMITED,
+        "Company username can only be changed once every 7 days.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
   }
 }

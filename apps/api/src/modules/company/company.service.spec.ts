@@ -6,6 +6,7 @@ import { CreateCompanyDto } from "./dto/create-company.dto.js";
 import { ErrorCode } from "../../common/errors/error-codes.js";
 import { HttpStatus } from "@nestjs/common";
 import { cleanDatabase } from "../../test/database/clean-database.js";
+import { USERNAME_CHANGE_RATE_LIMIT_DAYS } from "./company.constants.js";
 
 describe("CompanyService", () => {
   let prisma: PrismaService;
@@ -586,5 +587,74 @@ describe("CompanyService", () => {
       },
       status: HttpStatus.CONFLICT,
     });
+  });
+
+  it("rejects username changes within the 7-day rate limit window", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Rate Limited Company",
+      username: `rate-limit-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const releasedAt = new Date();
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: company.username,
+        releasedAt,
+        cooldownUntil: new Date(
+          releasedAt.getTime() + 30 * 24 * 60 * 60 * 1000,
+        ),
+      },
+    });
+
+    await expect(
+      service.changeUsername(company.id, owner.id, {
+        username: `new-username-${crypto.randomUUID().slice(0, 8)}`,
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_CHANGE_RATE_LIMITED,
+          message: "Company username can only be changed once every 7 days.",
+        },
+      },
+      status: HttpStatus.TOO_MANY_REQUESTS,
+    });
+  });
+
+  it("allows username changes after the 7-day rate limit window", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Rate Limit Expired Company",
+      username: `rate-expired-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const releasedAt = new Date(
+      Date.now() - (USERNAME_CHANGE_RATE_LIMIT_DAYS + 1) * 24 * 60 * 60 * 1000,
+    );
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: company.username,
+        releasedAt,
+        cooldownUntil: new Date(
+          releasedAt.getTime() + 30 * 24 * 60 * 60 * 1000,
+        ),
+      },
+    });
+
+    const newUsername = `new-username-${crypto.randomUUID().slice(0, 8)}`;
+    const result = await service.changeUsername(company.id, owner.id, {
+      username: newUsername,
+    });
+
+    expect(result.username).toBe(newUsername);
   });
 });

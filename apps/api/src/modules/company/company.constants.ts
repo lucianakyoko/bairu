@@ -1,0 +1,1 @@
+export const USERNAME_CHANGE_RATE_LIMIT_DAYS = 7;
