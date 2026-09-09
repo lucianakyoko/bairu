@@ -335,32 +335,13 @@ export class CompanyService {
     ownerUserId: string,
     dto: UpdateCompanyUsernameDto,
   ) {
-    const normalizedUsername = normalizeUsername(dto.username);
-    const result = await this.prisma.company.updateMany({
-      where: {
-        id: companyId,
-        ownerUserId,
-        status: CompanyStatus.ACTIVE,
-      },
-      data: {
-        username: normalizedUsername,
-      },
-    });
-
-    if (result.count === 1) {
-      return this.prisma.company.findUniqueOrThrow({
-        where: {
-          id: companyId,
-        },
-      });
-    }
-
     const company = await this.prisma.company.findUnique({
       where: {
         id: companyId,
       },
       select: {
         ownerUserId: true,
+        username: true,
         status: true,
       },
     });
@@ -373,10 +354,47 @@ export class CompanyService {
       );
     }
 
-    throw new AppException(
-      ErrorCode.COMPANY_USERNAME_CHANGE_NOT_ALLOWED,
-      "Company must be active to change its username.",
-      HttpStatus.CONFLICT,
-    );
+    if (company.status !== CompanyStatus.ACTIVE) {
+      throw new AppException(
+        ErrorCode.COMPANY_USERNAME_CHANGE_NOT_ALLOWED,
+        "Company must be active to change its username.",
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const normalizedUsername = normalizeUsername(dto.username);
+
+    if (normalizedUsername === company.username) {
+      throw new AppException(
+        ErrorCode.COMPANY_USERNAME_UNCHANGED,
+        "The new username must be different from the current username.",
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const result = await this.prisma.company.updateMany({
+      where: {
+        id: companyId,
+        ownerUserId,
+        status: CompanyStatus.ACTIVE,
+      },
+      data: {
+        username: normalizedUsername,
+      },
+    });
+
+    if (result.count !== 1) {
+      throw new AppException(
+        ErrorCode.COMPANY_NOT_FOUND,
+        "Company not found.",
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.prisma.company.findUniqueOrThrow({
+      where: {
+        id: companyId,
+      },
+    });
   }
 }

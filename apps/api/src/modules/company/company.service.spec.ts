@@ -539,4 +539,52 @@ describe("CompanyService", () => {
 
     expect(persistedCompany.username).toBe("bairu_123");
   });
+
+  it("rejects changing to the current username", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Same Username Company",
+      username: `same-username-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await expect(
+      service.changeUsername(company.id, owner.id, {
+        username: company.username,
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_UNCHANGED,
+          message:
+            "The new username must be different from the current username.",
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+  });
+
+  it("rejects changing to the current username with different casing", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Case Username Company",
+      username: `case-username-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await expect(
+      service.changeUsername(company.id, owner.id, {
+        username: company.username.toUpperCase(),
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_UNCHANGED,
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+  });
 });
