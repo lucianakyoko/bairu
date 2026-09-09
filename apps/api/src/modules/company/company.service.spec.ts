@@ -459,4 +459,24 @@ describe("CompanyService", () => {
       });
     },
   );
+
+  it("changes the company username through the dedicated operation", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Username Change Company",
+      username: `old-username-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const newUsername = `new-username-${crypto.randomUUID().slice(0, 8)}`;
+
+    const result = await service.changeUsername(company.id, owner.id, {
+      username: newUsername,
+    });
+
+    expect(result.id).toBe(company.id);
+    expect(result.ownerUserId).toBe(owner.id);
+    expect(result.username).toBe(newUsername);
+  });
 });

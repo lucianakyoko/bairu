@@ -10,6 +10,7 @@ import { ErrorCode } from "../../common/errors/error-codes.js";
 import { AppException } from "../../common/errors/app.exception.js";
 import { UpdateCompanyDto } from "./dto/update-company.dto.js";
 import { CompanyStatus } from "./enums/company-status.enum.js";
+import { UpdateCompanyUsernameDto } from "./dto/update-company-username.dto.js";
 
 @Injectable()
 export class CompanyService {
@@ -326,5 +327,21 @@ export class CompanyService {
 
       throw error;
     }
+  }
+
+  async changeUsername(
+    companyId: string,
+    ownerUserId: string,
+    dto: UpdateCompanyUsernameDto,
+  ) {
+    return this.prisma.company.update({
+      where: {
+        id: companyId,
+        ownerUserId,
+      },
+      data: {
+        username: dto.username,
+      },
+    });
   }
 }
