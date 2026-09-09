@@ -479,4 +479,40 @@ describe("CompanyService", () => {
     expect(result.ownerUserId).toBe(owner.id);
     expect(result.username).toBe(newUsername);
   });
+
+  it.each(["INACTIVE", "SUSPENDED", "ARCHIVED"] as const)(
+    "throws COMPANY_USERNAME_CHANGE_NOT_ALLOWED when changing username for a %s company",
+    async (status) => {
+      const owner = await createTestUser(prisma);
+
+      const company = await service.create(owner.id, {
+        name: "Company",
+        username: `username-status-${crypto.randomUUID().slice(0, 8)}`,
+        personType: CompanyPersonType.LEGAL_ENTITY,
+      });
+
+      await prisma.company.update({
+        where: {
+          id: company.id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      await expect(
+        service.changeUsername(company.id, owner.id, {
+          username: `new-username-${crypto.randomUUID().slice(0, 8)}`,
+        }),
+      ).rejects.toMatchObject({
+        response: {
+          error: {
+            code: ErrorCode.COMPANY_USERNAME_CHANGE_NOT_ALLOWED,
+            message: "Company must be active to change its username.",
+          },
+        },
+        status: HttpStatus.CONFLICT,
+      });
+    },
+  );
 });

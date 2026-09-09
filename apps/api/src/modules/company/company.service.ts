@@ -334,14 +334,47 @@ export class CompanyService {
     ownerUserId: string,
     dto: UpdateCompanyUsernameDto,
   ) {
-    return this.prisma.company.update({
+    const result = await this.prisma.company.updateMany({
       where: {
         id: companyId,
         ownerUserId,
+        status: CompanyStatus.ACTIVE,
       },
       data: {
         username: dto.username,
       },
     });
+
+    if (result.count === 1) {
+      return this.prisma.company.findUniqueOrThrow({
+        where: {
+          id: companyId,
+        },
+      });
+    }
+
+    const company = await this.prisma.company.findUnique({
+      where: {
+        id: companyId,
+      },
+      select: {
+        ownerUserId: true,
+        status: true,
+      },
+    });
+
+    if (!company || company.ownerUserId !== ownerUserId) {
+      throw new AppException(
+        ErrorCode.COMPANY_NOT_FOUND,
+        "Company not found.",
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    throw new AppException(
+      ErrorCode.COMPANY_USERNAME_CHANGE_NOT_ALLOWED,
+      "Company must be active to change its username.",
+      HttpStatus.CONFLICT,
+    );
   }
 }
