@@ -11,6 +11,7 @@ import { AppException } from "../../common/errors/app.exception.js";
 import { UpdateCompanyDto } from "./dto/update-company.dto.js";
 import { CompanyStatus } from "./enums/company-status.enum.js";
 import { UpdateCompanyUsernameDto } from "./dto/update-company-username.dto.js";
+import { normalizeUsername } from "./username/username.normalizer.js";
 
 @Injectable()
 export class CompanyService {
@@ -334,6 +335,7 @@ export class CompanyService {
     ownerUserId: string,
     dto: UpdateCompanyUsernameDto,
   ) {
+    const normalizedUsername = normalizeUsername(dto.username);
     const result = await this.prisma.company.updateMany({
       where: {
         id: companyId,
@@ -341,7 +343,7 @@ export class CompanyService {
         status: CompanyStatus.ACTIVE,
       },
       data: {
-        username: dto.username,
+        username: normalizedUsername,
       },
     });
 

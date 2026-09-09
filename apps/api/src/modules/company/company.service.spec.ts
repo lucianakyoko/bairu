@@ -515,4 +515,28 @@ describe("CompanyService", () => {
       });
     },
   );
+
+  it("persists the normalized username", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Username Normalization Company",
+      username: `old-username-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const result = await service.changeUsername(company.id, owner.id, {
+      username: "Bairu_123",
+    });
+
+    expect(result.username).toBe("bairu_123");
+
+    const persistedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(persistedCompany.username).toBe("bairu_123");
+  });
 });
