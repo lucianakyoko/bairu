@@ -18,6 +18,7 @@ import { plainToInstance } from "class-transformer";
 import { UpdateCompanyDto } from "./dto/update-company.dto.js";
 import { CompanyStatusResponseDto } from "./dto/company-status-response.dto.js";
 import { CompanyOwnershipGuard } from "../../common/security/guards/company-ownership.guard.js";
+import { UpdateCompanyUsernameDto } from "./dto/update-company-username.dto.js";
 
 @Controller("companies")
 export class CompanyController {
@@ -41,6 +42,25 @@ export class CompanyController {
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<CompanyResponseDto> {
     const company = await this.companyService.findById(id);
+
+    return plainToInstance(CompanyResponseDto, company, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @UseGuards(CompanyOwnershipGuard)
+  @Patch(":id/username")
+  async changeUsername(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCompanyUsernameDto,
+  ): Promise<CompanyResponseDto> {
+    const ownerUserId = this.currentUserService.getUserId();
+
+    const company = await this.companyService.changeUsername(
+      id,
+      ownerUserId,
+      dto,
+    );
 
     return plainToInstance(CompanyResponseDto, company, {
       excludeExtraneousValues: true,

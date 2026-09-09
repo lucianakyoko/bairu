@@ -137,6 +137,50 @@ describe("Company HTTP API", () => {
     });
   });
 
+  describe("PATCH /companies/:id/username", () => {
+    it("returns 200 when the requester is the company owner", async () => {
+      const owner = await createTestUser(prisma);
+      const company = await createCompanyWithStatus(
+        prisma,
+        owner.id,
+        CompanyStatus.ACTIVE,
+      );
+
+      process.env.DEV_USER_ID = owner.id;
+
+      const newUsername = `novo-username-${crypto.randomUUID().slice(0, 8)}`;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/v1/companies/${company.id}/username`)
+        .send({ username: newUsername })
+        .expect(200);
+
+      expect(response.body.id).toBe(company.id);
+      expect(response.body.username).toBe(newUsername);
+    });
+
+    it("returns 403 when the requester is not the owner", async () => {
+      const owner = await createTestUser(prisma);
+      const otherUser = await createTestUser(prisma);
+      const company = await createCompanyWithStatus(
+        prisma,
+        owner.id,
+        CompanyStatus.ACTIVE,
+      );
+
+      process.env.DEV_USER_ID = otherUser.id;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/v1/companies/${company.id}/username`)
+        .send({
+          username: `novo-username-${crypto.randomUUID().slice(0, 8)}`,
+        })
+        .expect(403);
+
+      expect(response.body.error.code).toBe("FORBIDDEN");
+    });
+  });
+
   describe("GET /companies/:id", () => {
     it("returns 200 with the company for a valid id", async () => {
       const owner = await createTestUser(prisma);
