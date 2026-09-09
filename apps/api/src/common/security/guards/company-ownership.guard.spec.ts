@@ -8,6 +8,7 @@ import { CurrentUserService } from "../../auth/current-user/current-user.service
 import { createTestUser } from "../../../test/factories/user.factory.js";
 import { CompanyPersonType } from "../../../modules/company/enums/company-person-type.enum.js";
 import { CompanyOwnershipGuard } from "./company-ownership.guard.js";
+import { cleanDatabase } from "../../../test/database/clean-database.js";
 
 describe("CompanyOwnershipGuard", () => {
   let prisma: PrismaService;
@@ -31,8 +32,7 @@ describe("CompanyOwnershipGuard", () => {
   });
 
   beforeEach(async () => {
-    await prisma.company.deleteMany();
-    await prisma.user.deleteMany();
+    await cleanDatabase(prisma);
 
     jest.clearAllMocks();
   });

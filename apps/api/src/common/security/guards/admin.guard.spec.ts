@@ -7,6 +7,7 @@ import { UserRole } from "../../../modules/user/enums/user-role.enum.js";
 import { UserStatus } from "../../../modules/user/enums/user-status.enum.js";
 import { createTestUser } from "../../../test/factories/user.factory.js";
 import { AdminGuard } from "./admin.guard.js";
+import { cleanDatabase } from "../../../test/database/clean-database.js";
 
 describe("AdminGuard", () => {
   let prisma: PrismaService;
@@ -30,8 +31,7 @@ describe("AdminGuard", () => {
   });
 
   beforeEach(async () => {
-    await prisma.company.deleteMany();
-    await prisma.user.deleteMany();
+    await cleanDatabase(prisma);
 
     jest.clearAllMocks();
   });
