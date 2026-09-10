@@ -386,38 +386,40 @@ export class CompanyService {
       cooldownUntil.getDate() + USERNAME_HISTORY_COOLDOWN_DAYS,
     );
 
-    const result = await this.prisma.company.updateMany({
-      where: {
-        id: companyId,
-        ownerUserId,
-        status: CompanyStatus.ACTIVE,
-      },
-      data: {
-        username: normalizedUsername,
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const result = await tx.company.updateMany({
+        where: {
+          id: companyId,
+          ownerUserId,
+          status: CompanyStatus.ACTIVE,
+        },
+        data: {
+          username: normalizedUsername,
+        },
+      });
 
-    if (result.count !== 1) {
-      throw new AppException(
-        ErrorCode.COMPANY_NOT_FOUND,
-        "Company not found.",
-        HttpStatus.NOT_FOUND,
-      );
-    }
+      if (result.count !== 1) {
+        throw new AppException(
+          ErrorCode.COMPANY_NOT_FOUND,
+          "Company not found.",
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
-    await this.prisma.companyUsernameHistory.create({
-      data: {
-        companyId,
-        username: previousUsername,
-        releasedAt,
-        cooldownUntil,
-      },
-    });
+      await tx.companyUsernameHistory.create({
+        data: {
+          companyId,
+          username: previousUsername,
+          releasedAt,
+          cooldownUntil,
+        },
+      });
 
-    return this.prisma.company.findUniqueOrThrow({
-      where: {
-        id: companyId,
-      },
+      return tx.company.findUniqueOrThrow({
+        where: {
+          id: companyId,
+        },
+      });
     });
   }
 
