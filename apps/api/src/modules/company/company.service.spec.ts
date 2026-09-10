@@ -6,7 +6,10 @@ import { CreateCompanyDto } from "./dto/create-company.dto.js";
 import { ErrorCode } from "../../common/errors/error-codes.js";
 import { HttpStatus } from "@nestjs/common";
 import { cleanDatabase } from "../../test/database/clean-database.js";
-import { USERNAME_CHANGE_RATE_LIMIT_DAYS } from "./company.constants.js";
+import {
+  USERNAME_CHANGE_RATE_LIMIT_DAYS,
+  USERNAME_HISTORY_COOLDOWN_DAYS,
+} from "./company.constants.js";
 
 describe("CompanyService", () => {
   let prisma: PrismaService;
@@ -656,5 +659,55 @@ describe("CompanyService", () => {
     });
 
     expect(result.username).toBe(newUsername);
+  });
+
+  it("creates username history when changing username", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "History Company",
+      username: `history-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const previousUsername = company.username;
+    const newUsername = `updated-${crypto.randomUUID().slice(0, 8)}`;
+
+    const beforeChange = new Date();
+
+    await service.changeUsername(company.id, owner.id, {
+      username: newUsername,
+    });
+
+    const afterChange = new Date();
+
+    const history = await prisma.companyUsernameHistory.findFirst({
+      where: {
+        companyId: company.id,
+        username: previousUsername,
+      },
+    });
+
+    expect(history).not.toBeNull();
+    expect(history?.companyId).toBe(company.id);
+    expect(history?.username).toBe(previousUsername);
+    expect(history?.releasedAt.getTime()).toBeGreaterThanOrEqual(
+      beforeChange.getTime(),
+    );
+    expect(history?.releasedAt.getTime()).toBeLessThanOrEqual(
+      afterChange.getTime(),
+    );
+    expect(history?.cooldownUntil.getTime()).toBe(
+      history!.releasedAt.getTime() +
+        USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+    );
+    expect(history?.claimedByCompanyId).toBeNull();
+    expect(history?.claimedAt).toBeNull();
+
+    const updatedCompany = await prisma.company.findUniqueOrThrow({
+      where: { id: company.id },
+    });
+
+    expect(updatedCompany.username).toBe(newUsername);
   });
 });

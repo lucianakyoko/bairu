@@ -12,7 +12,10 @@ import { UpdateCompanyDto } from "./dto/update-company.dto.js";
 import { CompanyStatus } from "./enums/company-status.enum.js";
 import { UpdateCompanyUsernameDto } from "./dto/update-company-username.dto.js";
 import { normalizeUsername } from "./username/username.normalizer.js";
-import { USERNAME_CHANGE_RATE_LIMIT_DAYS } from "./company.constants.js";
+import {
+  USERNAME_CHANGE_RATE_LIMIT_DAYS,
+  USERNAME_HISTORY_COOLDOWN_DAYS,
+} from "./company.constants.js";
 
 @Injectable()
 export class CompanyService {
@@ -375,6 +378,14 @@ export class CompanyService {
 
     await this.ensureUsernameChangeRateLimit(companyId);
 
+    const previousUsername = company.username;
+    const releasedAt = new Date();
+    const cooldownUntil = new Date(releasedAt);
+
+    cooldownUntil.setDate(
+      cooldownUntil.getDate() + USERNAME_HISTORY_COOLDOWN_DAYS,
+    );
+
     const result = await this.prisma.company.updateMany({
       where: {
         id: companyId,
@@ -393,6 +404,15 @@ export class CompanyService {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    await this.prisma.companyUsernameHistory.create({
+      data: {
+        companyId,
+        username: previousUsername,
+        releasedAt,
+        cooldownUntil,
+      },
+    });
 
     return this.prisma.company.findUniqueOrThrow({
       where: {
