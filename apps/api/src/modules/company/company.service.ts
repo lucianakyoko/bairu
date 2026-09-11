@@ -386,41 +386,57 @@ export class CompanyService {
       cooldownUntil.getDate() + USERNAME_HISTORY_COOLDOWN_DAYS,
     );
 
-    return this.prisma.$transaction(async (tx) => {
-      const result = await tx.company.updateMany({
-        where: {
-          id: companyId,
-          ownerUserId,
-          status: CompanyStatus.ACTIVE,
-        },
-        data: {
-          username: normalizedUsername,
-        },
-      });
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const result = await tx.company.updateMany({
+          where: {
+            id: companyId,
+            ownerUserId,
+            status: CompanyStatus.ACTIVE,
+          },
+          data: {
+            username: normalizedUsername,
+          },
+        });
 
-      if (result.count !== 1) {
+        if (result.count !== 1) {
+          throw new AppException(
+            ErrorCode.COMPANY_NOT_FOUND,
+            "Company not found.",
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        await tx.companyUsernameHistory.create({
+          data: {
+            companyId,
+            username: previousUsername,
+            releasedAt,
+            cooldownUntil,
+          },
+        });
+
+        return tx.company.findUniqueOrThrow({
+          where: {
+            id: companyId,
+          },
+        });
+      });
+    } catch (error) {
+      if (
+        isPrismaKnownRequestError(error) &&
+        error.code === "P2002" &&
+        getPrismaConstraintFields(error).includes("username")
+      ) {
         throw new AppException(
-          ErrorCode.COMPANY_NOT_FOUND,
-          "Company not found.",
-          HttpStatus.NOT_FOUND,
+          ErrorCode.COMPANY_USERNAME_ALREADY_IN_USE,
+          "Username is already in use.",
+          HttpStatus.CONFLICT,
         );
       }
 
-      await tx.companyUsernameHistory.create({
-        data: {
-          companyId,
-          username: previousUsername,
-          releasedAt,
-          cooldownUntil,
-        },
-      });
-
-      return tx.company.findUniqueOrThrow({
-        where: {
-          id: companyId,
-        },
-      });
-    });
+      throw error;
+    }
   }
 
   private async ensureUsernameChangeRateLimit(

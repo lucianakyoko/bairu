@@ -10,6 +10,7 @@ import {
   USERNAME_CHANGE_RATE_LIMIT_DAYS,
   USERNAME_HISTORY_COOLDOWN_DAYS,
 } from "./company.constants.js";
+import { AppException } from "../../common/errors/app.exception.js";
 
 describe("CompanyService", () => {
   let prisma: PrismaService;
@@ -709,5 +710,59 @@ describe("CompanyService", () => {
     });
 
     expect(updatedCompany.username).toBe(newUsername);
+  });
+
+  it("throws a domain error when the new username is already in use", async () => {
+    const owner = await createTestUser(prisma);
+    const otherOwner = await createTestUser(prisma);
+
+    const existingCompany = await service.create(otherOwner.id, {
+      name: "Existing Company",
+      username: `existing-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const company = await service.create(owner.id, {
+      name: "Company",
+      username: `company-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    try {
+      await service.changeUsername(company.id, owner.id, {
+        username: existingCompany.username,
+      });
+
+      throw new Error("Expected username conflict to throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(AppException);
+
+      const response = (error as AppException).getResponse();
+
+      expect(response).toEqual({
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_ALREADY_IN_USE,
+          message: "Username is already in use.",
+        },
+      });
+
+      expect((error as AppException).getStatus()).toBe(HttpStatus.CONFLICT);
+    }
+
+    const unchangedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(unchangedCompany.username).toBe(company.username);
+
+    const history = await prisma.companyUsernameHistory.findMany({
+      where: {
+        companyId: company.id,
+      },
+    });
+
+    expect(history).toHaveLength(0);
   });
 });
