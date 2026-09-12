@@ -179,6 +179,74 @@ describe("Company HTTP API", () => {
 
       expect(response.body.error.code).toBe("FORBIDDEN");
     });
+
+    it("returns 400 for an invalid uuid", async () => {
+      const owner = await createTestUser(prisma);
+
+      process.env.DEV_USER_ID = owner.id;
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/v1/companies/not-a-uuid/username")
+        .send({
+          username: "novo-username",
+        })
+        .expect(400);
+
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+
+    it("returns 400 for an invalid body", async () => {
+      const owner = await createTestUser(prisma);
+      const company = await createCompanyWithStatus(
+        prisma,
+        owner.id,
+        CompanyStatus.ACTIVE,
+      );
+
+      process.env.DEV_USER_ID = owner.id;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/v1/companies/${company.id}/username`)
+        .send({
+          username: 123,
+        })
+        .expect(400);
+
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+
+    it("returns 409 when the new username is already in use", async () => {
+      const owner = await createTestUser(prisma);
+      const otherOwner = await createTestUser(prisma);
+
+      const existingCompany = await createCompanyWithStatus(
+        prisma,
+        otherOwner.id,
+        CompanyStatus.ACTIVE,
+      );
+
+      const company = await createCompanyWithStatus(
+        prisma,
+        owner.id,
+        CompanyStatus.ACTIVE,
+      );
+
+      process.env.DEV_USER_ID = owner.id;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/v1/companies/${company.id}/username`)
+        .send({
+          username: existingCompany.username,
+        })
+        .expect(409);
+
+      expect(response.body).toEqual({
+        error: {
+          code: "COMPANY_USERNAME_ALREADY_IN_USE",
+          message: "Username is already in use.",
+        },
+      });
+    });
   });
 
   describe("GET /companies/:id", () => {
