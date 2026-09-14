@@ -765,4 +765,31 @@ describe("CompanyService", () => {
 
     expect(history).toHaveLength(0);
   });
+
+  it("normalizes the username before persisting it", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Company",
+      username: `company-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const requestedUsername = `NEW-USERNAME-${crypto.randomUUID().slice(0, 8)}`;
+    const expectedUsername = requestedUsername.toLowerCase();
+
+    const updatedCompany = await service.changeUsername(company.id, owner.id, {
+      username: requestedUsername,
+    });
+
+    expect(updatedCompany.username).toBe(expectedUsername);
+
+    const persistedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(persistedCompany.username).toBe(expectedUsername);
+  });
 });
