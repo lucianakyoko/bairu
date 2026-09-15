@@ -473,10 +473,7 @@ export class CompanyService {
     }
   }
 
-  async recoverUsername(
-    companyId: string,
-    username: string,
-  ): Promise<CompanyUsernameHistory> {
+  async recoverUsername(companyId: string, username: string) {
     const history = await this.findRecoverableUsernameHistory(
       companyId,
       username,
@@ -490,7 +487,14 @@ export class CompanyService {
       );
     }
 
-    return history;
+    return this.prisma.company.update({
+      where: {
+        id: companyId,
+      },
+      data: {
+        username: history.username,
+      },
+    });
   }
 
   private async findRecoverableUsernameHistory(
