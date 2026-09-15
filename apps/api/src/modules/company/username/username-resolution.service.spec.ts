@@ -31,7 +31,7 @@ describe("UsernameResolutionService", () => {
   it("returns the company when username is currently assigned", async () => {
     const owner = await createTestUser(prisma);
 
-    const username = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const username = `company-${crypto.randomUUID().slice(0, 8)}`;
 
     const company = await companyService.create(owner.id, {
       name: "Current Username Company",
@@ -41,14 +41,19 @@ describe("UsernameResolutionService", () => {
 
     const result = await service.resolve(username);
 
-    expect(result?.id).toBe(company.id);
-    expect(result?.username).toBe(username);
+    expect(result).toEqual({
+      type: "CURRENT",
+      company: expect.objectContaining({
+        id: company.id,
+        username,
+      }),
+    });
   });
 
   it("normalizes username before querying", async () => {
     const owner = await createTestUser(prisma);
 
-    const username = `normalized-${crypto.randomUUID().slice(0, 8)}`;
+    const username = `company-${crypto.randomUUID().slice(0, 8)}`;
 
     const company = await companyService.create(owner.id, {
       name: "Normalized Username Company",
@@ -58,7 +63,13 @@ describe("UsernameResolutionService", () => {
 
     const result = await service.resolve(username.toUpperCase());
 
-    expect(result?.id).toBe(company.id);
+    expect(result).toEqual({
+      type: "CURRENT",
+      company: expect.objectContaining({
+        id: company.id,
+        username,
+      }),
+    });
   });
 
   it("returns null when username is not currently assigned", async () => {
@@ -67,5 +78,38 @@ describe("UsernameResolutionService", () => {
     const result = await service.resolve(username);
 
     expect(result).toBeNull();
+  });
+
+  it("returns historical record when username is not currently assigned", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const historicalUsername = `historical-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await companyService.create(owner.id, {
+      name: "Historical Username Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const history = await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: historicalUsername,
+        releasedAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000),
+        cooldownUntil: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    const result = await service.resolve(historicalUsername);
+
+    expect(result).toEqual({
+      type: "HISTORY",
+      history: expect.objectContaining({
+        id: history.id,
+        companyId: company.id,
+        username: historicalUsername,
+      }),
+    });
   });
 });
