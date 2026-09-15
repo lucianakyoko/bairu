@@ -1198,6 +1198,25 @@ describe("CompanyService", () => {
 
     expect(updatedHistory?.claimedByCompanyId).toBe(claimantCompany.id);
     expect(updatedHistory?.claimedAt).not.toBeNull();
+
+    await expect(
+      service.recoverUsername(originalCompany.id, historicalUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+
+    const unchangedOriginalCompany = await prisma.company.findUnique({
+      where: {
+        id: originalCompany.id,
+      },
+    });
+
+    expect(unchangedOriginalCompany?.username).toBe(originalUsername);
   });
 
   it("rejects claiming a historical username that is still in cooldown", async () => {
