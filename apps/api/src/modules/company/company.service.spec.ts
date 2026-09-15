@@ -792,4 +792,36 @@ describe("CompanyService", () => {
 
     expect(persistedCompany.username).toBe(expectedUsername);
   });
+
+  it("keeps the company unchanged when username recovery fails", async () => {
+    const owner = await createTestUser(prisma);
+
+    const company = await service.create(owner.id, {
+      name: "Recovery Transaction Company",
+      username: `recovery-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const originalUsername = company.username;
+
+    await expect(
+      service.recoverUsername(company.id, "username-that-does-not-exist"),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+          message: "Username history cannot be recovered.",
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+
+    const unchangedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(unchangedCompany.username).toBe(originalUsername);
+  });
 });

@@ -16,7 +16,6 @@ import {
   USERNAME_CHANGE_RATE_LIMIT_DAYS,
   USERNAME_HISTORY_COOLDOWN_DAYS,
 } from "./company.constants.js";
-import type { CompanyUsernameHistory } from "../../generated/prisma/client.js";
 
 @Injectable()
 export class CompanyService {
@@ -474,44 +473,36 @@ export class CompanyService {
   }
 
   async recoverUsername(companyId: string, username: string) {
-    const history = await this.findRecoverableUsernameHistory(
-      companyId,
-      username,
-    );
+    return await this.prisma.$transaction(async (tx) => {
+      const normalizedUsername = normalizeUsername(username);
 
-    if (!history) {
-      throw new AppException(
-        ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
-        "Username history cannot be recovered.",
-        HttpStatus.CONFLICT,
-      );
-    }
+      const history = await tx.companyUsernameHistory.findFirst({
+        where: {
+          companyId,
+          username: normalizedUsername,
+          claimedByCompanyId: null,
+        },
+        orderBy: {
+          releasedAt: "desc",
+        },
+      });
 
-    return this.prisma.company.update({
-      where: {
-        id: companyId,
-      },
-      data: {
-        username: history.username,
-      },
-    });
-  }
+      if (!history) {
+        throw new AppException(
+          ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+          "Username history cannot be recovered.",
+          HttpStatus.CONFLICT,
+        );
+      }
 
-  private async findRecoverableUsernameHistory(
-    companyId: string,
-    username: string,
-  ): Promise<CompanyUsernameHistory | null> {
-    const normalizedUsername = normalizeUsername(username);
-
-    return this.prisma.companyUsernameHistory.findFirst({
-      where: {
-        companyId,
-        username: normalizedUsername,
-        claimedByCompanyId: null,
-      },
-      orderBy: {
-        releasedAt: "desc",
-      },
+      return tx.company.update({
+        where: {
+          id: companyId,
+        },
+        data: {
+          username: history.username,
+        },
+      });
     });
   }
 }
