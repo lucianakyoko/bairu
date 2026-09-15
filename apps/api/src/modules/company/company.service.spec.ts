@@ -824,4 +824,321 @@ describe("CompanyService", () => {
 
     expect(unchangedCompany.username).toBe(originalUsername);
   });
+
+  it("recovers a username during the cooldown period", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Recovery During Cooldown Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const releasedAt = new Date();
+    const cooldownUntil = new Date(
+      releasedAt.getTime() +
+        USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+    );
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: previousUsername,
+        releasedAt,
+        cooldownUntil,
+      },
+    });
+
+    const result = await service.recoverUsername(company.id, previousUsername);
+
+    expect(result.username).toBe(previousUsername);
+
+    const persistedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(persistedCompany.username).toBe(previousUsername);
+  });
+
+  it("recovers a username after the cooldown period", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Recovery After Cooldown Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const releasedAt = new Date(
+      Date.now() - (USERNAME_HISTORY_COOLDOWN_DAYS + 1) * 24 * 60 * 60 * 1000,
+    );
+
+    const cooldownUntil = new Date(
+      releasedAt.getTime() +
+        USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+    );
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: previousUsername,
+        releasedAt,
+        cooldownUntil,
+      },
+    });
+
+    const result = await service.recoverUsername(company.id, previousUsername);
+
+    expect(result.username).toBe(previousUsername);
+  });
+
+  it("does not create additional username history when recovering", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Recovery History Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: previousUsername,
+        releasedAt: new Date(),
+        cooldownUntil: new Date(
+          Date.now() + USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+        ),
+      },
+    });
+
+    const historyBefore = await prisma.companyUsernameHistory.findMany({
+      where: {
+        companyId: company.id,
+      },
+    });
+
+    await service.recoverUsername(company.id, previousUsername);
+
+    const historyAfter = await prisma.companyUsernameHistory.findMany({
+      where: {
+        companyId: company.id,
+      },
+    });
+
+    expect(historyAfter).toHaveLength(historyBefore.length);
+    expect(historyAfter).toEqual(historyBefore);
+  });
+
+  it("recovers the most recent username history", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Latest Recovery History Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const olderReleasedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+
+    const newerReleasedAt = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+
+    await prisma.companyUsernameHistory.createMany({
+      data: [
+        {
+          companyId: company.id,
+          username: previousUsername,
+          releasedAt: olderReleasedAt,
+          cooldownUntil: new Date(
+            olderReleasedAt.getTime() +
+              USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+          ),
+        },
+        {
+          companyId: company.id,
+          username: previousUsername,
+          releasedAt: newerReleasedAt,
+          cooldownUntil: new Date(
+            newerReleasedAt.getTime() +
+              USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+          ),
+        },
+      ],
+    });
+
+    const result = await service.recoverUsername(company.id, previousUsername);
+
+    expect(result.username).toBe(previousUsername);
+
+    const histories = await prisma.companyUsernameHistory.findMany({
+      where: {
+        companyId: company.id,
+        username: previousUsername,
+      },
+      orderBy: {
+        releasedAt: "desc",
+      },
+    });
+
+    expect(histories).toHaveLength(2);
+    expect(histories[0]?.releasedAt).toEqual(newerReleasedAt);
+  });
+
+  it("rejects recovery when the username history has been claimed", async () => {
+    const owner = await createTestUser(prisma);
+    const claimant = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Claimed History Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const claimantCompany = await service.create(claimant.id, {
+      name: "Claimant Company",
+      username: `claimant-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: previousUsername,
+        releasedAt: new Date(),
+        cooldownUntil: new Date(
+          Date.now() + USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+        ),
+        claimedByCompanyId: claimantCompany.id,
+        claimedAt: new Date(),
+      },
+    });
+
+    await expect(
+      service.recoverUsername(company.id, previousUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+          message: "Username history cannot be recovered.",
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+
+    const persistedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(persistedCompany.username).toBe(currentUsername);
+  });
+
+  it("rejects recovery by a different company", async () => {
+    const ownerA = await createTestUser(prisma);
+    const ownerB = await createTestUser(prisma);
+
+    const companyA = await service.create(ownerA.id, {
+      name: "Original History Company",
+      username: `company-a-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const companyB = await service.create(ownerB.id, {
+      name: "Different Company",
+      username: `company-b-${crypto.randomUUID().slice(0, 8)}`,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const previousUsername = `previous-${crypto.randomUUID().slice(0, 8)}`;
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: companyA.id,
+        username: previousUsername,
+        releasedAt: new Date(),
+        cooldownUntil: new Date(
+          Date.now() + USERNAME_HISTORY_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+        ),
+      },
+    });
+
+    await expect(
+      service.recoverUsername(companyB.id, previousUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+          message: "Username history cannot be recovered.",
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+
+    const persistedCompanyA = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: companyA.id,
+      },
+    });
+
+    const persistedCompanyB = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: companyB.id,
+      },
+    });
+
+    expect(persistedCompanyA.username).not.toBe(previousUsername);
+    expect(persistedCompanyB.username).not.toBe(previousUsername);
+  });
+
+  it("rejects recovery when the username history does not exist", async () => {
+    const owner = await createTestUser(prisma);
+
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Missing History Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const missingUsername = `missing-${crypto.randomUUID().slice(0, 8)}`;
+
+    await expect(
+      service.recoverUsername(company.id, missingUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+          message: "Username history cannot be recovered.",
+        },
+      },
+      status: HttpStatus.CONFLICT,
+    });
+
+    const persistedCompany = await prisma.company.findUniqueOrThrow({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(persistedCompany.username).toBe(currentUsername);
+  });
 });
