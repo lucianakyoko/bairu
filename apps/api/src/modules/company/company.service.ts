@@ -505,4 +505,80 @@ export class CompanyService {
       });
     });
   }
+
+  async claimUsername(companyId: string, username: string) {
+    const normalizedUsername = normalizeUsername(username);
+
+    return await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.findUnique({
+        where: {
+          id: companyId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!company) {
+        throw new AppException(
+          ErrorCode.COMPANY_NOT_FOUND,
+          "Company not found.",
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const history = await tx.companyUsernameHistory.findFirst({
+        where: {
+          username: normalizedUsername,
+          claimedByCompanyId: null,
+        },
+        orderBy: {
+          releasedAt: "desc",
+        },
+      });
+
+      if (!history) {
+        throw new AppException(
+          ErrorCode.COMPANY_USERNAME_CLAIM_NOT_ALLOWED,
+          "Username cannot be claimed.",
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const now = new Date();
+
+      if (history.cooldownUntil > now) {
+        throw new AppException(
+          ErrorCode.COMPANY_USERNAME_CLAIM_NOT_ALLOWED,
+          "Username is still in cooldown.",
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      await tx.company.update({
+        where: {
+          id: companyId,
+        },
+        data: {
+          username: history.username,
+        },
+      });
+
+      await tx.companyUsernameHistory.update({
+        where: {
+          id: history.id,
+        },
+        data: {
+          claimedByCompanyId: companyId,
+          claimedAt: now,
+        },
+      });
+
+      return tx.company.findUniqueOrThrow({
+        where: {
+          id: companyId,
+        },
+      });
+    });
+  }
 }

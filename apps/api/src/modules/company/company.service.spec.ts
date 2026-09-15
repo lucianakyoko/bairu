@@ -1141,4 +1141,141 @@ describe("CompanyService", () => {
 
     expect(persistedCompany.username).toBe(currentUsername);
   });
+
+  it("claims an available historical username for another company", async () => {
+    const originalOwner = await createTestUser(prisma);
+    const claimantOwner = await createTestUser(prisma);
+
+    const historicalUsername = `claimed-${crypto.randomUUID().slice(0, 8)}`;
+    const originalUsername = `original-${crypto.randomUUID().slice(0, 8)}`;
+    const claimantUsername = `claimant-${crypto.randomUUID().slice(0, 8)}`;
+
+    const originalCompany = await service.create(originalOwner.id, {
+      name: "Original Company",
+      username: originalUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const claimantCompany = await service.create(claimantOwner.id, {
+      name: "Claimant Company",
+      username: claimantUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const releasedAt = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+
+    const cooldownUntil = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+
+    const history = await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: originalCompany.id,
+        username: historicalUsername,
+        releasedAt,
+        cooldownUntil,
+      },
+    });
+
+    const result = await service.claimUsername(
+      claimantCompany.id,
+      historicalUsername,
+    );
+
+    expect(result.username).toBe(historicalUsername);
+
+    const updatedCompany = await prisma.company.findUnique({
+      where: {
+        id: claimantCompany.id,
+      },
+    });
+
+    expect(updatedCompany?.username).toBe(historicalUsername);
+
+    const updatedHistory = await prisma.companyUsernameHistory.findUnique({
+      where: {
+        id: history.id,
+      },
+    });
+
+    expect(updatedHistory?.claimedByCompanyId).toBe(claimantCompany.id);
+    expect(updatedHistory?.claimedAt).not.toBeNull();
+  });
+
+  it("rejects claiming a historical username that is still in cooldown", async () => {
+    const originalOwner = await createTestUser(prisma);
+    const claimantOwner = await createTestUser(prisma);
+
+    const historicalUsername = `cooldown-claim-${crypto.randomUUID().slice(0, 8)}`;
+    const originalUsername = `original-${crypto.randomUUID().slice(0, 8)}`;
+    const claimantUsername = `claimant-${crypto.randomUUID().slice(0, 8)}`;
+
+    const originalCompany = await service.create(originalOwner.id, {
+      name: "Original Company",
+      username: originalUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const claimantCompany = await service.create(claimantOwner.id, {
+      name: "Claimant Company",
+      username: claimantUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: originalCompany.id,
+        username: historicalUsername,
+        releasedAt: new Date(),
+        cooldownUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await expect(
+      service.claimUsername(claimantCompany.id, historicalUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_CLAIM_NOT_ALLOWED,
+        },
+      },
+    });
+
+    const unchangedCompany = await prisma.company.findUnique({
+      where: {
+        id: claimantCompany.id,
+      },
+    });
+
+    expect(unchangedCompany?.username).toBe(claimantUsername);
+  });
+
+  it("rejects claiming a username without an available historical record", async () => {
+    const owner = await createTestUser(prisma);
+
+    const companyUsername = `company-${crypto.randomUUID().slice(0, 8)}`;
+    const unavailableUsername = `missing-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await service.create(owner.id, {
+      name: "Claiming Company",
+      username: companyUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    await expect(
+      service.claimUsername(company.id, unavailableUsername),
+    ).rejects.toMatchObject({
+      response: {
+        error: {
+          code: ErrorCode.COMPANY_USERNAME_CLAIM_NOT_ALLOWED,
+        },
+      },
+    });
+
+    const unchangedCompany = await prisma.company.findUnique({
+      where: {
+        id: company.id,
+      },
+    });
+
+    expect(unchangedCompany?.username).toBe(companyUsername);
+  });
 });
