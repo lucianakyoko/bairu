@@ -473,6 +473,26 @@ export class CompanyService {
     }
   }
 
+  async recoverUsername(
+    companyId: string,
+    username: string,
+  ): Promise<CompanyUsernameHistory> {
+    const history = await this.findRecoverableUsernameHistory(
+      companyId,
+      username,
+    );
+
+    if (!history) {
+      throw new AppException(
+        ErrorCode.COMPANY_USERNAME_HISTORY_NOT_RECOVERABLE,
+        "Username history cannot be recovered.",
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    return history;
+  }
+
   private async findRecoverableUsernameHistory(
     companyId: string,
     username: string,
