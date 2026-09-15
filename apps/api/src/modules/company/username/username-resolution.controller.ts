@@ -1,10 +1,15 @@
 import { Controller, Get, Param } from "@nestjs/common";
 
+import { UsernameResolutionService } from "./username-resolution.service.js";
+
 @Controller("companies/username")
 export class UsernameResolutionController {
+  constructor(
+    private readonly usernameResolutionService: UsernameResolutionService,
+  ) {}
+
   @Get(":username")
   async resolveByUsername(@Param("username") username: string) {
-    // Resolution logic will be implemented in the following subtasks.
-    return { username };
+    return this.usernameResolutionService.resolve(username);
   }
 }

@@ -5,6 +5,8 @@ import { DatabaseModule } from "../../database/database.module.js";
 import { CurrentUserModule } from "../../common/auth/current-user/current-user.module.js";
 import { AdminCompanyController } from "./admin/admin-company.controller.js";
 import { UsernameResolutionController } from "./username/username-resolution.controller.js";
+import { UsernameResolutionService } from "./username/username-resolution.service.js";
+import { UsernameAvailabilityService } from "./username/username-availability.service.js";
 
 @Module({
   imports: [DatabaseModule, CurrentUserModule],
@@ -13,6 +15,10 @@ import { UsernameResolutionController } from "./username/username-resolution.con
     AdminCompanyController,
     UsernameResolutionController,
   ],
-  providers: [CompanyService],
+  providers: [
+    CompanyService,
+    UsernameAvailabilityService,
+    UsernameResolutionService,
+  ],
 })
 export class CompanyModule {}
