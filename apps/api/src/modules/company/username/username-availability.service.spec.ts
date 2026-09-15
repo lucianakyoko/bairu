@@ -38,16 +38,18 @@ describe("UsernameAvailabilityService", () => {
     });
   });
 
-  it("returns CURRENTLY_TAKEN when username belongs to a company", async () => {
+  it("returns CURRENTLY_TAKEN when username is currently assigned to a company", async () => {
     const owner = await createTestUser(prisma);
 
-    const company = await companyService.create(owner.id, {
+    const username = `taken-${crypto.randomUUID().slice(0, 8)}`;
+
+    await companyService.create(owner.id, {
       name: "Current Username Company",
-      username: `taken-${crypto.randomUUID().slice(0, 8)}`,
+      username,
       personType: CompanyPersonType.LEGAL_ENTITY,
     });
 
-    const result = await service.resolve(company.username);
+    const result = await service.resolve(username);
 
     expect(result).toEqual({
       status: "CURRENTLY_TAKEN",
