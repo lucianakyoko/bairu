@@ -4,10 +4,15 @@ import { CompanyService } from "./company.service.js";
 import { DatabaseModule } from "../../database/database.module.js";
 import { CurrentUserModule } from "../../common/auth/current-user/current-user.module.js";
 import { AdminCompanyController } from "./admin/admin-company.controller.js";
+import { UsernameResolutionController } from "./username/username-resolution.controller.js";
 
 @Module({
   imports: [DatabaseModule, CurrentUserModule],
-  controllers: [CompanyController, AdminCompanyController],
+  controllers: [
+    CompanyController,
+    AdminCompanyController,
+    UsernameResolutionController,
+  ],
   providers: [CompanyService],
 })
 export class CompanyModule {}
