@@ -16,6 +16,7 @@ import {
   USERNAME_CHANGE_RATE_LIMIT_DAYS,
   USERNAME_HISTORY_COOLDOWN_DAYS,
 } from "./company.constants.js";
+import type { CompanyUsernameHistory } from "../../generated/prisma/client.js";
 
 @Injectable()
 export class CompanyService {
@@ -470,5 +471,23 @@ export class CompanyService {
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
+  }
+
+  private async findRecoverableUsernameHistory(
+    companyId: string,
+    username: string,
+  ): Promise<CompanyUsernameHistory | null> {
+    const normalizedUsername = normalizeUsername(username);
+
+    return this.prisma.companyUsernameHistory.findFirst({
+      where: {
+        companyId,
+        username: normalizedUsername,
+        claimedByCompanyId: null,
+      },
+      orderBy: {
+        releasedAt: "desc",
+      },
+    });
   }
 }
