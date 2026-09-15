@@ -59,35 +59,29 @@ describe("UsernameAvailabilityService", () => {
   it("returns IN_COOLDOWN when username has an active historical cooldown", async () => {
     const owner = await createTestUser(prisma);
 
+    const historicalUsername = `cooldown-${crypto.randomUUID().slice(0, 8)}`;
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+
     const company = await companyService.create(owner.id, {
       name: "Cooldown Company",
-      username: `cooldown-${crypto.randomUUID().slice(0, 8)}`,
+      username: currentUsername,
       personType: CompanyPersonType.LEGAL_ENTITY,
     });
 
     const releasedAt = new Date();
 
+    const cooldownUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
     await prisma.companyUsernameHistory.create({
       data: {
         companyId: company.id,
-        username: company.username,
+        username: historicalUsername,
         releasedAt,
-        cooldownUntil: new Date(
-          releasedAt.getTime() + 30 * 24 * 60 * 60 * 1000,
-        ),
+        cooldownUntil,
       },
     });
 
-    await prisma.company.update({
-      where: {
-        id: company.id,
-      },
-      data: {
-        username: `current-${crypto.randomUUID().slice(0, 8)}`,
-      },
-    });
-
-    const result = await service.resolve(company.username);
+    const result = await service.resolve(historicalUsername);
 
     expect(result).toEqual({
       status: "IN_COOLDOWN",
