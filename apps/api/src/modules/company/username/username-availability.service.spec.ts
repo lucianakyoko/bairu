@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { jest } from "@jest/globals";
 
 import { UsernameAvailabilityService } from "./username-availability.service.js";
 import { PrismaService } from "../../../database/prisma.service.js";
@@ -14,6 +15,20 @@ describe("UsernameAvailabilityService", () => {
 
   beforeEach(async () => {
     await cleanDatabase(prisma);
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers({
+      doNotFake: [
+        "setTimeout",
+        "clearTimeout",
+        "setInterval",
+        "clearInterval",
+        "setImmediate",
+        "clearImmediate",
+        "nextTick",
+      ],
+    });
   });
 
   beforeAll(async () => {
@@ -112,6 +127,52 @@ describe("UsernameAvailabilityService", () => {
         cooldownUntil,
       },
     });
+
+    const result = await service.resolve(historicalUsername);
+
+    expect(result).toEqual({
+      status: "AVAILABLE",
+    });
+  });
+
+  it("returns AVAILABLE exactly when cooldown ends", async () => {
+    const owner = await createTestUser(prisma);
+
+    const historicalUsername = `boundary-${crypto.randomUUID().slice(0, 8)}`;
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await companyService.create(owner.id, {
+      name: "Boundary Cooldown Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const cooldownUntil = new Date("2026-09-15T19:00:00.000Z");
+
+    await prisma.companyUsernameHistory.create({
+      data: {
+        companyId: company.id,
+        username: historicalUsername,
+        releasedAt: new Date(
+          cooldownUntil.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        cooldownUntil,
+      },
+    });
+
+    jest.useFakeTimers({
+      doNotFake: [
+        "setTimeout",
+        "clearTimeout",
+        "setInterval",
+        "clearInterval",
+        "setImmediate",
+        "clearImmediate",
+        "nextTick",
+      ],
+    });
+
+    jest.setSystemTime(cooldownUntil);
 
     const result = await service.resolve(historicalUsername);
 
