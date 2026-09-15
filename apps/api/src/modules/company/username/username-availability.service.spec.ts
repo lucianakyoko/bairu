@@ -180,4 +180,46 @@ describe("UsernameAvailabilityService", () => {
       status: "AVAILABLE",
     });
   });
+
+  it("uses the most recent historical record when multiple histories exist", async () => {
+    const owner = await createTestUser(prisma);
+
+    const historicalUsername = `history-${crypto.randomUUID().slice(0, 8)}`;
+    const currentUsername = `current-${crypto.randomUUID().slice(0, 8)}`;
+
+    const company = await companyService.create(owner.id, {
+      name: "Multiple Histories Company",
+      username: currentUsername,
+      personType: CompanyPersonType.LEGAL_ENTITY,
+    });
+
+    const now = new Date();
+
+    const olderReleasedAt = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000);
+
+    const newerReleasedAt = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+    await prisma.companyUsernameHistory.createMany({
+      data: [
+        {
+          companyId: company.id,
+          username: historicalUsername,
+          releasedAt: olderReleasedAt,
+          cooldownUntil: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
+        },
+        {
+          companyId: company.id,
+          username: historicalUsername,
+          releasedAt: newerReleasedAt,
+          cooldownUntil: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
+        },
+      ],
+    });
+
+    const result = await service.resolve(historicalUsername);
+
+    expect(result).toEqual({
+      status: "AVAILABLE",
+    });
+  });
 });

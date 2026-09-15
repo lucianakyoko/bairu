@@ -34,23 +34,20 @@ export class UsernameAvailabilityService {
 
     const now = new Date();
 
-    const activeHistory = await this.prisma.companyUsernameHistory.findFirst({
+    const latestHistory = await this.prisma.companyUsernameHistory.findFirst({
       where: {
         username: normalizedUsername,
         claimedByCompanyId: null,
-        cooldownUntil: {
-          gt: now,
-        },
       },
       orderBy: {
         releasedAt: "desc",
       },
       select: {
-        id: true,
+        cooldownUntil: true,
       },
     });
 
-    if (activeHistory) {
+    if (latestHistory && latestHistory.cooldownUntil > now) {
       return {
         status: "IN_COOLDOWN",
       };
